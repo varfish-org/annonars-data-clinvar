@@ -1,0 +1,7 @@
+*:Zone.Identifier
+
+*~
+.*.sw?
+/.vscode
+
+/annonars-data-clinvar
