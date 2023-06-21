@@ -1,9 +1,6 @@
 name: Check ClinVar FTP
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
   schedule:
     #         ┌───────────── minute (0 - 59)
@@ -64,10 +61,7 @@ jobs:
             cp /tmp/clinvar-release.txt clinvar-release.txt
             git add clinvar-release.txt
 
-            echo "chore: update ClinVar release to $release_name" >/tmp/msg.txt
-            echo "" >>/tmp/msg.txt
-            echo "Release-As: $release_name" >>/tmp/msg.txt
-            git commit --file=/tmp/msg.txt
+            git commit -m "chore: update ClinVar release to $release_name"
           else
             set -e
             git checkout $branch_name
