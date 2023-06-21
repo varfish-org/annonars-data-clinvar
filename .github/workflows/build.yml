@@ -59,7 +59,7 @@ jobs:
       - name: Download reference files if necessary
         run: bash src/download-refs.sh
 
-      - name: Build data via clinvar-tsv
-        shell: bash -el {0}
-        run: |
-          bash src/run.sh
+      # - name: Build data via clinvar-tsv
+      #   shell: bash -el {0}
+      #   run: |
+      #     bash src/run.sh
