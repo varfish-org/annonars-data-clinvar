@@ -48,36 +48,3 @@ jobs:
           > /tmp/clinvar-release.txt
           release_name=$(cat /tmp/clinvar-release.txt)
 
-          # Check whether we already have a branch for this
-          branch_name=clinvar-release-$release_name
-          set +e
-          git branch -a | grep "${branch_name}$" >/dev/null
-          branch_needed=$?
-          if [ "$branch_needed" -eq 1 ]; then
-            set -e
-            # Create new branch with updated `clinvar-release.txt`
-            git checkout -b $branch_name
-
-            cp /tmp/clinvar-release.txt clinvar-release.txt
-            git add clinvar-release.txt
-
-            echo "chore: update ClinVar release to $release_name" >/tmp/msg.txt
-            echo "" >>/tmp/msg.txt
-            echo "Release-As: $release_name" >>/tmp/msg.txt
-            git commit --file=/tmp/msg.txt
-          else
-            set -e
-            git checkout $branch_name
-          fi
-
-          # Create new pull request and set it to auto-merge
-          set +e
-          gh pr view >/dev/null
-          pr_needed=$?
-          if [ "$pr_needed" -eq 1 ]; then
-            set -e
-            gh pr create --fill --base main --head $branch_name
-            gh pr merge --auto
-          else
-            set -e
-          fi
