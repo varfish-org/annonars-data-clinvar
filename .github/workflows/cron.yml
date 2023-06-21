@@ -1,6 +1,9 @@
 name: Check ClinVar FTP
 
 on:
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     #         ┌───────────── minute (0 - 59)
