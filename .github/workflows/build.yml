@@ -21,7 +21,7 @@ jobs:
           - "0.12.4"
         clinvar_tsv_version:
           - "0.5.0"
-          # - "0.6.0"
+          # - "0.6.1"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
       - name: Cache reference files
         uses: actions/cache@v3
         with:
-          path: /var/lib/annonars-data-clinvar/references
+          path: /home/runner/work/references
           key: ${{ runner.os }}-references
 
       - name: Make some free space on the disk
@@ -59,7 +59,7 @@ jobs:
       - name: Download reference files if necessary
         run: bash src/download-refs.sh
 
-      # - name: Build data via clinvar-tsv
-      #   shell: bash -el {0}
-      #   run: |
-      #     bash src/run.sh
+      - name: Build data via clinvar-tsv
+        shell: bash -el {0}
+        run: |
+          bash src/run.sh

@@ -5,3 +5,9 @@
 /.vscode
 
 /annonars-data-clinvar
+
+/.snakemake/
+/downloads/
+/parsed/
+/normalized/
+/output/
