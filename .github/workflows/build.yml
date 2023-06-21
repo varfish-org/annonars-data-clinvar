@@ -50,7 +50,7 @@ jobs:
       - name: Cache reference files
         uses: actions/cache@v3
         with:
-          path: /var/local/annonars-data-clinvar/references
+          path: /var/lib/annonars-data-clinvar/references
           key: ${{ runner.os }}-references
 
       - name: Make some free space on the disk

@@ -3,8 +3,9 @@
 set -euo pipefail
 set -x
 
-export REF=/var/local/annonars-data-clinvar/references
-mkdir -p $REF
+export REF=/var/lib/annonars-data-clinvar/references
+sudo mkdir -p $REF
+sudo chmod a+w $REF
 
 export TMPDIR=$(mktemp -d)
 trap "rm -rf $TMPDIR" EXIT ERR

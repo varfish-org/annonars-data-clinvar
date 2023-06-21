@@ -4,7 +4,7 @@ set -euo pipefail
 set -x
 
 export TMPDIR=$(mktemp -d)
-export REF=/var/local/annonars-data-clinvar/references
+export REF=/var/lib/annonars-data-clinvar/references
 
 clinvar_tsv main \
     --b37-path $REF/hs37d5.fa \
