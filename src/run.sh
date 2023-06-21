@@ -33,6 +33,6 @@ echo "Run clinvar-tsv"
 clinvar_tsv main \
     --b37-path $TMPDIR/hs37d5.fa \
     --b38-path $TMPDIR/GRCh38_no_alt_analysis_set.fa \
-    --clinvar-version $(cat $checkout_dir/clinvar-release.txt)
+    --clinvar-version $(cat $checkout_dir/clinvar-release.txt || echo 2023-0617)
 
 find .
