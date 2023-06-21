@@ -1,11 +1,13 @@
 #!/usr/bin/bash
 
+set -euo pipefail
+
 set -x
 
 pushd /tmp
 git clone https://github.com/bihealth/clinvar-tsv.git
 cd clinvar-tsv
-pip uninstall clinvar-tsv
+pip uninstall -y clinvar-tsv
 pip install -e .
 popd
 
