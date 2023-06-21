@@ -20,7 +20,7 @@ jobs:
         annonars_version:
           - "0.12.4"
         clinvar_tsv_version:
-          - "0.5.0"
+          - "0.6.0"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -46,6 +46,19 @@ jobs:
             annonars=${{ matrix.annonars_version }}
             clinvar-tsv=${{ matrix.clinvar_tsv_version }}
 
-      - name: Run the data build
+      - name: Cache reference files
+        uses: actions/cache@v3
+        with:
+          path: /var/local/annonars-data-clinvar/references
+          key: ${{ runner.os }}-references
+
+      - name: Make some free space on the disk
+        run: bash src/free-space.sh
+
+      - name: Download reference files if necessary
+        run: bash src/download-refs.sh
+
+      - name: Build data via clinvar-tsv
+        shell: bash -el {0}
         run: |
           bash src/run.sh
