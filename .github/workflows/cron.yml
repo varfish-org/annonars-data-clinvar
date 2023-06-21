@@ -1,12 +1,6 @@
 name: Check ClinVar FTP
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
   schedule:
     #         ┌───────────── minute (0 - 59)
@@ -68,6 +62,7 @@ jobs:
             | git commit --file=-
           else
             set -e
+            git checkout $branch_name
           fi
 
           # Create new pull request and set it to auto-merge
