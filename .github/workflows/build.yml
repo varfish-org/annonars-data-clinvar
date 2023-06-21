@@ -37,6 +37,7 @@ jobs:
           channels: conda-forge,bioconda,defaults
           extra-specs: |
             python =3.10
+            samtools
             annonars =${{ matrix.annonars_version }}
             clinvar-tsv =${{ matrix.clinvar_tsv_version }}
 
