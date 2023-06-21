@@ -80,7 +80,7 @@ jobs:
           if [ "$pr_needed" -eq 1 ]; then
             set -e
             gh pr create --fill --base main --head $branch_name
-            gh pr merge --auto
+            gh pr merge --auto --squash
           else
             set -e
           fi
