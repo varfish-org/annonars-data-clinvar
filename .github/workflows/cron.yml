@@ -30,6 +30,8 @@ jobs:
           git config user.email "<>"
 
       - name: Create new PR if necessary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
 
@@ -79,4 +81,3 @@ jobs:
           else
             set -e
           fi
-        shell: bash -el {0}
