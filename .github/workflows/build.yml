@@ -20,7 +20,8 @@ jobs:
         annonars_version:
           - "0.12.4"
         clinvar_tsv_version:
-          - "0.6.0"
+          - "0.5.0"
+          # - "0.6.0"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
