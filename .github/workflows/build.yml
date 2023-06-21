@@ -30,16 +30,20 @@ jobs:
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Install Conda environment
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: false
+          cache-environment: true
           environment-name: annonars-data-clinvar
-          channels: conda-forge,bioconda,defaults
-          extra-specs: |
-            python =3.10
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+              - defaults
+          create-args: >-
+            python=3.10
             samtools
-            annonars =${{ matrix.annonars_version }}
-            clinvar-tsv =${{ matrix.clinvar_tsv_version }}
+            annonars=${{ matrix.annonars_version }}
+            clinvar-tsv=${{ matrix.clinvar_tsv_version }}
 
       - name: Run the data build
         run: |
