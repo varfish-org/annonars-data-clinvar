@@ -1,0 +1,81 @@
+name: Check ClinVar FTP
+
+on:
+  workflow_dispatch:
+  schedule:
+    #         ┌───────────── minute (0 - 59)
+    #         │ ┌───────────── hour (0 - 23)
+    #         │ │ ┌───────────── day of the month (1 - 31)
+    #         │ │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+    #         │ │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    #         │ │ │ │ │
+    #         │ │ │ │ │
+    #         │ │ │ │ │
+    #         * * * * *
+    - cron: '37 * * * *'
+
+jobs:
+  Check-ClinVar-FTP:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: setup git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+      - name: Create new PR if necessary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -x
+
+          # Download ClinVar XML listing
+          curl https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/weekly_release/ \
+          > /tmp/lst.html
+
+          # Look for latest release name
+          grep '.xml.gz"' /tmp/lst.html \
+          | tail -n 1 \
+          | cut -d '"' -f 2 \
+          | cut -d _ -f 2 \
+          | cut -d . -f 1 \
+          > /tmp/clinvar-release.txt
+          release_name=$(cat /tmp/clinvar-release.txt)
+
+          # Check whether we already have a branch for this
+          branch_name=clinvar-release-$release_name
+          set +e
+          git branch -a | grep "${branch_name}$" >/dev/null
+          branch_needed=$?
+          if [ "$branch_needed" -eq 1 ]; then
+            set -e
+            # Create new branch with updated `clinvar-release.txt`
+            git checkout -b $branch_name
+
+            cp /tmp/clinvar-release.txt clinvar-release.txt
+            git add clinvar-release.txt
+
+            git commit -m "chore: update ClinVar release to $release_name"
+            git push --set-upstream origin $branch_name
+          else
+            set -e
+            git checkout $branch_name
+          fi
+
+          # Create new pull request and set it to auto-merge
+          set +e
+          gh pr view >/dev/null
+          pr_exists=$?
+          if [ "$pr_exists" -eq 0 ]; then
+            set -e
+            gh pr create --fill --base main --head $branch_name
+            gh pr merge --auto
+          else
+            set -e
+          fi
