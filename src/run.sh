@@ -29,8 +29,9 @@ echo "Download reference genomes and build FAI indices"
 
 wget -O $TMPDIR/hs37d5.fa.gz \
     https://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
-zcat --quiet $TMPDIR/hs37d5.fa.gz \
+bgzip -c -d $TMPDIR/hs37d5.fa.gz \
 > $TMPDIR/hs37d5.fa
+tail $TMPDIR/hs37d5.fa
 rm $TMPDIR/hs37d5.fa.gz
 samtools faidx $TMPDIR/hs37d5.fa
 
