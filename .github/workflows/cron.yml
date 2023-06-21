@@ -55,11 +55,14 @@ jobs:
             set -e
             # Create new branch with updated `clinvar-release.txt`
             git checkout -b $branch_name
+
             cp /tmp/clinvar-release.txt clinvar-release.txt
             git add clinvar-release.txt
-            echo -e \
-              "chore: update ClinVar release to $release_name\n\nRelease-As: $release_name" \
-            | git commit --file=-
+
+            echo "chore: update ClinVar release to $release_name" >/tmp/msg.txt
+            echo "" >>/tmp/msg.txt
+            echo "Release-As: $release_name" >>/tmp/msg.txt
+            git commit --file=/tmp/msg.txt
           else
             set -e
             git checkout $branch_name
