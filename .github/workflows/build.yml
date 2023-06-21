@@ -42,6 +42,7 @@ jobs:
           create-args: >-
             python=3.10
             samtools
+            htslib
             annonars=${{ matrix.annonars_version }}
             clinvar-tsv=${{ matrix.clinvar_tsv_version }}
 
