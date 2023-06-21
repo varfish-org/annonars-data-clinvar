@@ -72,6 +72,6 @@ jobs:
           git push --set-upstream origin $branch_name
 
           # Create new pull request and set it to auto-merge
-          gh pr create --fill --base main --head $branch_name --merge
+          gh pr create --fill --base main --head $branch_name
           gh pr merge --auto
         shell: bash -el {0}
