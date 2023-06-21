@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# cf. https://github.com/mamba-org/provision-with-micromamba#important
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        annonars_version:
+          - "0.12.4"
+        clinvar_tsv_version:
+          - "0.5.0"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Install Conda environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: false
+          environment-name: annonars-data-clinvar
+          channels: conda-forge,bioconda,defaults
+          extra-specs: |
+            python =3.10
+            annonars =${{ matrix.annonars_version }}
+            clinvar-tsv =${{ matrix.clinvar_tsv_version }}
+
+      - name: Run the data build
+        run: |
+          bash src/run.sh
