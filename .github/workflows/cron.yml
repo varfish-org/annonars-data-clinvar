@@ -81,4 +81,4 @@ jobs:
           fi
         shell: bash -el {0}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
