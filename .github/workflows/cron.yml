@@ -31,6 +31,8 @@ jobs:
 
       - name: Create new PR if necessary
         run: |
+          set -x
+
           # Download ClinVar XML listing
           curl https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/weekly_release/ \
           > /tmp/lst.html
