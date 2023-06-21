@@ -47,15 +47,14 @@ jobs:
           release_name=$(cat /tmp/clinvar-release.txt)
 
           # Check whether we already have a branch for this
-          set +e
           branch_name=clinvar-release-$release_name
           git branch -a | grep "${branch_name}$" >/dev/null
           branch_exists=$?
-          set -e
-          if [ "$branch_exists" -eq 1 ]; then
+          if [ "$branch_exists" -eq 0 ]; then
               # all good, branch exists
               exit 0
           fi
+          set +e
 
           # Create new branch with updated `clinvar-release.txt`
           git checkout -b $branch_name
