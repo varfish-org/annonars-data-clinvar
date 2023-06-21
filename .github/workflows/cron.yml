@@ -56,25 +56,33 @@ jobs:
           branch_name=clinvar-release-$release_name
           set +e
           git branch -a | grep "${branch_name}$" >/dev/null
-          branch_exists=$?
-          if [ "$branch_exists" -eq 0 ]; then
-              # all good, branch exists
-              exit 0
+          branch_needed=$?
+          if [ "$branch_needed" -eq 1 ]; then
+            set -e
+            # Create new branch with updated `clinvar-release.txt`
+            git checkout -b $branch_name
+            cp /tmp/clinvar-release.txt clinvar-release.txt
+            git add clinvar-release.txt
+            git commit -m "chore: update ClinVar release to $release_name
+
+            Release-As: $release_name"
+            git push --set-upstream origin $branch_name
+            "
+          else
+            set -e
           fi
-          set -e
-
-          # Create new branch with updated `clinvar-release.txt`
-          git checkout -b $branch_name
-          cp /tmp/clinvar-release.txt clinvar-release.txt
-          git add clinvar-release.txt
-          git commit -m "chore: update ClinVar release to $release_name
-
-          Release-As: $release_name"
-          git push --set-upstream origin $branch_name
 
           # Create new pull request and set it to auto-merge
-          gh pr create --fill --base main --head $branch_name
-          gh pr merge --auto
+          set +e
+          gh pr view >/dev/null
+          pr_needed=$?
+          if [ "$pr_needed" -eq 1 ]; then
+            set -e
+            gh pr create --fill --base main --head $branch_name
+            gh pr merge --auto
+          else
+            set -e
+          fi
         shell: bash -el {0}
         env:
           GH_TOKEN: ${{ github.token }}
