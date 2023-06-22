@@ -514,7 +514,7 @@ jobs:
 
       - name: Run the merging
         if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
-        run: bash src/run-merge-seqvars.sh
+        run: bash src/run-merge-seqvar.sh
         env:
           GENOME_RELEASE: "${{ matrix.genome_release }}"
 
