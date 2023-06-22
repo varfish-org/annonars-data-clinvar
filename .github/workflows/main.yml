@@ -275,6 +275,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
           key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
@@ -350,6 +351,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
           key: sort-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
@@ -414,6 +416,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
           key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
@@ -478,6 +481,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged
           key: merge-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
@@ -545,6 +549,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
           key: merge-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
@@ -608,6 +613,7 @@ jobs:
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
           key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          lookup-only: true
 
       - name: Install Conda environment
         if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
