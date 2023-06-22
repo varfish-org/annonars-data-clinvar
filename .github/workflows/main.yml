@@ -44,6 +44,7 @@ jobs:
   Download-Ref:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Download reference
         uses: ./.github/actions/download-ref
 
@@ -51,6 +52,7 @@ jobs:
   Download-ClinVar:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Download ClinVar
         uses: ./.github/actions/download-clinvar
 

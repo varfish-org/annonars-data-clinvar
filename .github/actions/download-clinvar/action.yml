@@ -4,8 +4,6 @@ description: Download ClinVar XML file
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
-
     - name: Get ClinVar version
       id: get-clinvar
       run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT

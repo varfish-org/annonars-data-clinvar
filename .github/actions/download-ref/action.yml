@@ -4,8 +4,6 @@ description: Download reference FASTA files
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
-
     - name: Install Conda environment
       uses: mamba-org/setup-micromamba@v1
       with:
