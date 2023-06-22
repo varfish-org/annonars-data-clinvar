@@ -1,6 +1,13 @@
 name: merge-strucvars
 description: Merge structural variant files
 
+inputs:
+  publish-artifacts:
+    default: "false"
+    description: "Whether to publish artifacts to the named release"
+  release-name:
+    description: "The name of the release to publish artifacts to"
+
 runs:
   using: "composite"
   steps:

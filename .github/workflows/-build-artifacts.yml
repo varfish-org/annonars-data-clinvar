@@ -3,11 +3,12 @@
 on:
   workflow_call:
     inputs:
+      # Whether to publish artifacts to the named release
+      publish-artifacts:
+        type: string
+      # The name of the release to publish artifacts to
       release-name:
         type: string
-      # Whether to publish artifacts to the named release.
-      publish-artifacts:
-        type: boolean
 
 # cf. https://github.com/mamba-org/provision-with-micromamba#important
 defaults:
