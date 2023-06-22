@@ -140,36 +140,45 @@ jobs:
         id: get-clinvar
         run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
-      - name: Retrieve cached ClinVar file
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CLINVAR_DIR }}
-          key: clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
-          fail-on-cache-miss: true
-
       - name: Cache GRCh37 sequence variant parse_xml output
+        id: cache-grch37-seqvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
           key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
 
       - name: Cache GRCh37 structural variant parse_xml output
+        id: cache-grch37-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
           key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
 
       - name: Cache GRCh38 sequence variant parse_xml output
+        id: cache-grch38-seqvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
           key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
 
       - name: Cache GRCh38 structural variant parse_xml output
+        id: cache-grch38-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
           key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
+
+      - name: Retrieve cached ClinVar file
+        if: |
+          (steps.cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CLINVAR_DIR }}
+          key: clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
+          fail-on-cache-miss: true
 
       - name: Run the conversion
         run: bash src/run-parse-xml.sh
@@ -198,7 +207,15 @@ jobs:
         id: get-today
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: Retrieve GRCh37 sequence variant parse_xml output cache
+      - name: Cache conversion output
+        id: cache-conversion-output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar-normalized
+
+      - name: Retrieve sequence variant parse_xml output cache
+        if: steps.cache-conversion-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
@@ -206,6 +223,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Retrieve reference cache
+        if: steps.cache-conversion-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.REF_DIR }}
@@ -213,7 +231,31 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Run the conversion
+        if: steps.cache-conversion-output.outputs.cache-hit != 'true'
         run: bash src/run-parse-xml.sh
         env:
           CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
           GENOME_RELEASE: "${{ matrix.genome_release }}"
+
+  # # Sort-SeqVars: Sort small variants.
+  # Sort-SeqVars:
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - Normalize-SeqVars
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Get ClinVar version
+  #       id: get-clinvar
+  #       run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+
+  #     - name: Get current date
+  #       id: get-today
+  #       run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+  # # Sort-StrucVars: Sort structural variants.
+  # Sort-StrucVars:
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - Convert-Clinvar
+  #   steps:
