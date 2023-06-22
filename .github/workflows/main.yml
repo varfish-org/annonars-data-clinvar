@@ -10,4 +10,4 @@ on:
 
 jobs:
   Build-Artifacts:
-    uses: .github/workflows/-build-artifacts.yml
+    uses: ./.github/workflows/-build-artifacts.yml
