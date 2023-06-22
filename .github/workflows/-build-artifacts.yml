@@ -120,6 +120,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/merge-seqvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
 
   # Merge-StrucVars: merge structural variants RCV into VCV records.
   Merge-StrucVars:
@@ -134,6 +137,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/merge-seqvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
 
   # Annonars-Import: Import seqvars into annonars RocksDB
   Annonars-Import:
@@ -148,3 +154,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/annonars-import
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}

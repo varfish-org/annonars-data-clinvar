@@ -70,20 +70,21 @@ runs:
     - name: Publish artifacts
       if: inputs.publish-artifacts == 'true'
       run: |
+        genome_release=$(echo ${{ matrix.genome_release }} | tr '[:upper:]' '[:lower:]')
         version=$(\
             grep ^dc.identifier \
               ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import/spec.yaml \
             | rev \
             | cut -d - -f 1 \
             | rev)
-        mkdir -p /tmp/for-upload/clinvar-annonars-rocksdb-$version
+        mkdir -p /tmp/for-upload/clinvar-annonars-rocksdb-$genome_release-$version
         rsync -av \
           ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import/. \
-          /tmp/for-upload/clinvar-annonars-rocksdb-$version/.
-        ls -lhR /tmp/for-upload/clinvar-annonars-rocksdb-$version
+          /tmp/for-upload/clinvar-annonars-rocksdb-$genome_release-$version/.
+        ls -lhR /tmp/for-upload/clinvar-annonars-rocksdb-$genome_release-$version
         cd /tmp/for-upload
-        tar -czf clinvar-annonars-rocksdb-$version.tar.gz clinvar-annonars-rocksdb-$version
-        gh release upload "${{ inputs.release-name }}" clinvar-annonars-rocksdb-$version.tar.gz
+        tar -czf clinvar-annonars-rocksdb-$genome_release-$version.tar.gz clinvar-annonars-rocksdb-$genome_release-$version
+        gh release upload "${{ inputs.release-name }}" clinvar-annonars-rocksdb-$genome_release-$version.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # cf. https://github.com/mamba-org/provision-with-micromamba#important

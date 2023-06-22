@@ -71,3 +71,21 @@ runs:
         GENOME_RELEASE: "${{ matrix.genome_release }}"
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
+
+    - name: Publish artifacts
+      if: inputs.publish-artifacts == 'true'
+      run: |
+        genome_release=$(echo ${{ matrix.genome_release }} | tr '[:upper:]' '[:lower:]')
+        version=${{ steps.get-clinvar.outputs.clinvar-release }}+${{ env.CLINVAR_TSV_VERSION }}
+        mkdir -p /tmp/for-upload/clinvar-seqvar-$genome_release-$version
+        rsync -av \
+          ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged/. \
+          /tmp/for-upload/clinvar-seqvar-$genome_release-$version/.
+        ls -lhR /tmp/for-upload/clinvar-seqvar-$genome_release-$version
+        cd /tmp/for-upload
+        tar -czf clinvar-seqvar-$genome_release-$version.tar.gz clinvar-seqvar-$genome_release-$version
+        gh release upload "${{ inputs.release-name }}" clinvar-seqvar-$version-$genome_release-$version.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
