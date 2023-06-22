@@ -7,13 +7,13 @@ set -x
 
 mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/sorted
 
-INPUT=${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/parsed/output.tsv
+INPUT=${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/parsed/output.tsv
 
 cat \
     <(cat $INPUT | head -n 1) \
     <(cat $INPUT | tail -n +2 | sort -k2,2V -k3,3n -k4,4n -k11,11) \
 | bgzip -c \
-> ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/sorted/output.tsv.bgz
+> ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/sorted/output.tsv.bgz
 
 tabix -S 1 -s 2 -b 3 -e 4 -f \
-    ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/sorted/output.tsv.bgz
+    ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/sorted/output.tsv.bgz
