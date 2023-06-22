@@ -145,28 +145,28 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
-          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar-parsed
 
       - name: Cache GRCh37 structural variant parse_xml output
         id: cache-grch37-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
-          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar-parsed
 
       - name: Cache GRCh38 sequence variant parse_xml output
         id: cache-grch38-seqvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
-          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar-parsed
 
       - name: Cache GRCh38 structural variant parse_xml output
         id: cache-grch38-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
-          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar-parsed
 
       - name: Retrieve cached ClinVar file
         if: |
@@ -199,6 +199,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install Conda environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          cache-environment: true
+          environment-name: annonars-data-clinvar
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+              - defaults
+          create-args: >-
+            samtools
+            htslib
+            python=${{ env.PYTHON_VERSION }}
+            annonars=${{ env.ANNONARS_VERSION }}
+            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
+
       - name: Get ClinVar version
         id: get-clinvar
         run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
@@ -219,7 +236,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
-          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar-parsed
           fail-on-cache-miss: true
 
       - name: Retrieve reference cache
@@ -234,28 +251,88 @@ jobs:
         if: steps.cache-conversion-output.outputs.cache-hit != 'true'
         run: bash src/run-parse-xml.sh
         env:
-          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
           GENOME_RELEASE: "${{ matrix.genome_release }}"
 
-  # # Sort-SeqVars: Sort small variants.
-  # Sort-SeqVars:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - Normalize-SeqVars
-  #   steps:
-  #     - uses: actions/checkout@v2
+  # Sort-SeqVars: Sort small variants.
+  Sort-SeqVars:
+    runs-on: ubuntu-latest
+    needs:
+      - Normalize-SeqVars
+    strategy:
+      matrix:
+        genome_release:
+          - GRCh37
+          - GRCh38
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Get ClinVar version
-  #       id: get-clinvar
-  #       run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      - name: Get ClinVar version
+        id: get-clinvar
+        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
-  #     - name: Get current date
-  #       id: get-today
-  #       run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: Get current date
+        id: get-today
+        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-  # # Sort-StrucVars: Sort structural variants.
-  # Sort-StrucVars:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - Convert-Clinvar
-  #   steps:
+      - name: Cache sorting output
+        id: cache-sort-output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar-sort
+
+      - name: Retrieve conversion output cache
+        if: steps.cache-sort-output.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar-normalized
+          fail-on-cache-miss: true
+
+      - name: Run the sorting
+        if: steps.cache-sort-output.outputs.cache-hit != 'true'
+        run: bash src/run-sort-seqvar.sh
+        env:
+          GENOME_RELEASE: "${{ matrix.genome_release }}"
+
+  # Sort-StrucVars: Sort structural variants.
+  Sort-StrucVars:
+    runs-on: ubuntu-latest
+    needs:
+      - Convert-Clinvar
+    strategy:
+      matrix:
+        genome_release:
+          - GRCh37
+          - GRCh38
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get ClinVar version
+        id: get-clinvar
+        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+
+      - name: Get current date
+        id: get-today
+        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Cache sorting output
+        id: cache-sort-output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-strucvar-sort
+
+      - name: Retrieve conversion output cache
+        if: steps.cache-sort-output.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-strucvar-parsed
+          fail-on-cache-miss: true
+
+      - name: Run the sorting
+        if: steps.cache-sort-output.outputs.cache-hit != 'true'
+        run: bash src/run-sort-strucvar.sh
+        env:
+          GENOME_RELEASE: "${{ matrix.genome_release }}"
