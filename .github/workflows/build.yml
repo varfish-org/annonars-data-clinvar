@@ -18,15 +18,18 @@ env:
   REF_DIR: /home/runner/work/references
   # Path to the directory with ClinVar download.
   CLINVAR_DIR: /home/runner/work/clinvar
+  # Parse to the directory with clinvar-tsv output files.
+  OUTPUT_DIR: /home/runner/work/output
+  # Python version
+  PYTHON_VERSION: "3.10"
+  # annonars package version
+  ANNONARS_VERSION: "0.12.43"
+  # clinvar-tsv package version
+  CLINVAR_TSV_VERSION: "0.6.2"
+  # Maximal number of RCVs to process.
+  MAX_RCVS: 1000
 
 jobs:
-  # strategy:
-  #   matrix:
-  #     annonars_version:
-  #       - "0.12.4"
-  #     clinvar_tsv_version:
-  #       - "0.6.2"
-
   # - name: Install Conda environment
   #   uses: mamba-org/setup-micromamba@v1
   #   with:
@@ -45,8 +48,6 @@ jobs:
   #       clinvar-tsv=${{ matrix.clinvar_tsv_version }}
 
   # Download-Ref: Download reference sequences
-  #
-  # We will cache them for the current day.
   Download-Ref:
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +74,7 @@ jobs:
       - name: Cache reference files
         uses: actions/cache@v3
         with:
-          path: /home/runner/work/references
+          path: ${{ env.REF_DIR }}}
           key: references-${{ steps.get-today.outputs.today }}
 
       - name: Download reference files if necessary
@@ -89,13 +90,78 @@ jobs:
         id: get-clinvar
         run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
-      - name: Cache ClinVar files
+      - name: Cache downloaded ClinVar file
         uses: actions/cache@v3
         with:
-          path: /home/runner/work/clinvar
+          path: ${{ env.CLINVAR_DIR }}
           key: clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
 
       - name: Download reference files if necessary
         run: bash src/download-clinvar.sh
+        env:
+          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
+
+
+  # Convert-ClinVar: Convert ClinVar XML file to TSV.
+  Convert-Clinvar:
+    needs: Download-ClinVar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Conda environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          cache-environment: true
+          environment-name: annonars-data-clinvar
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+              - defaults
+          create-args: >-
+            samtools
+            htslib
+            python=${{ env.PYTHON_VERSION }}}
+            annonars=${{ env.ANNONARS_VERSION }}
+            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
+
+      - name: Get clinvar version
+        id: get-clinvar
+        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+
+      - name: Retrieve cached ClinVar file
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CLINVAR_DIR }}
+          key: clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
+          fail-on-cache-miss: true
+
+      - name: Cache GRCh37 sequence variant output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
+
+      - name: Cache GRCh37 structural variant output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
+
+      - name: Cache GRCh38 sequence variant output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
+
+      - name: Cache GRCh38 structural variant output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar
+          key: output-tsv-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
+
+      - name: Run the conversion
+        run: bash src/run-parse-xml.sh
         env:
           CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
