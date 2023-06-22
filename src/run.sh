@@ -8,7 +8,7 @@ export REF=/home/runner/work/references
 export DEBUG_MEM=1
 
 pushd /tmp
-micromamba remove -y clinvar-tsv
+/home/runner/micromamba-bin/micromamba remove -y clinvar-tsv
 git clone --branch debug-normalize https://github.com/bihealth/clinvar-tsv.git
 cd clinvar-tsv
 pip install .
