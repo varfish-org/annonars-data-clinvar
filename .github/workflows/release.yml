@@ -42,7 +42,10 @@ jobs:
         run: |
           gh release create clinvar-weekly-$RELEASE_NAME --draft=true \
             --title "ClinVar Weekly Release $RELEASE_NAME" \
-            --notes "This release was created automatically by GitHub Action in our CI."
+            --notes "This release was created automatically by GitHub Action in our CI.
+
+            **WARNING: we truncate to ~1k records for testing purposes**
+            "
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NAME: ${{ steps.check-release.outputs.release-name }}
