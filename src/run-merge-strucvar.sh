@@ -25,3 +25,5 @@ zcat ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/sorted/output.tsv.bgz \
 
 tabix -S 1 -s 2 -b 3 -e 4 \
     -f ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/merged/output.tsv.bgz
+
+ls -lhR ${OUTPUT_DIR}
