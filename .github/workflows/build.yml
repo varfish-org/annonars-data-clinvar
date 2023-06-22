@@ -87,7 +87,7 @@ jobs:
 
       - name: Get clinvar version
         id: get-clinvar
-        run: echo "cat clinvar-release || echo 00-latest_weekly" >> $GITHUB_OUTPUT
+        run: echo "clinvar_release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
       - name: Cache ClinVar files
         uses: actions/cache@v3
