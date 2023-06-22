@@ -68,8 +68,8 @@ jobs:
             git checkout $branch_name
           fi
 
-          # Enforce that the "autorelease: pending" ticket is present.
-          gh label create "autorelease: pending" --color EDEDED --force
+          # Enforce that the "autorelease" ticket is present.
+          gh label create "autorelease" --color EDEDED --force
 
           # Create new pull request and set it to auto-merge
           set +e
@@ -77,7 +77,7 @@ jobs:
           pr_needed=$?
           if [ "$pr_needed" -eq 1 ]; then
             set -e
-            gh pr create --fill --base main --head $branch_name
+            gh pr create --fill --base main --head $branch_name --label autorelease
             gh pr merge --auto --squash
           else
             set -e
