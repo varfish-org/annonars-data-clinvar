@@ -2,8 +2,7 @@
 
 # Run the sorting and tabix on the output of "run-normalize-tsv.sh"
 
-set +e
-set -uo pipefail
+set -euo pipefail
 set -x
 
 mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/strucvar/sorted
