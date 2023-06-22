@@ -68,6 +68,9 @@ jobs:
             git checkout $branch_name
           fi
 
+          # Enforce that the "autorelease: pending" ticket is present.
+          gh label create "autorelease: pending" --color EDEDED --force
+
           # Create new pull request and set it to auto-merge
           set +e
           gh pr view >/dev/null
