@@ -27,7 +27,7 @@ env:
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.2"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1000
+  MAX_RCVS: 1001
 
 jobs:
   cancel-previous:
@@ -237,7 +237,7 @@ jobs:
           key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
           fail-on-cache-miss: true
 
-      - name: Run the conversion
+      - name: Run the xml-to-tsv conversion
         if: |
           (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
           (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
@@ -269,15 +269,15 @@ jobs:
         id: get-today
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: Check cache conversion output
-        id: check-cache-conversion-output
+      - name: Check cache normalization output
+        id: check-cache-normalization-output
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
           key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
 
       - name: Install Conda environment
-        if: steps.check-cache-conversion-output.outputs.cache-hit != 'true'
+        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
         uses: mamba-org/setup-micromamba@v1
         with:
           cache-environment: true
@@ -295,14 +295,14 @@ jobs:
             clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
 
       - name: Cache conversion output
-        if: steps.check-cache-conversion-output.outputs.cache-hit != 'true'
+        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
           key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
 
       - name: Retrieve sequence variant parse_xml output cache
-        if: steps.check-cache-conversion-output.outputs.cache-hit != 'true'
+        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
@@ -310,7 +310,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Retrieve reference cache
-        if: steps.check-cache-conversion-output.outputs.cache-hit != 'true'
+        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.REF_DIR }}
@@ -318,7 +318,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Run the conversion
-        if: steps.check-cache-conversion-output.outputs.cache-hit != 'true'
+        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
         run: bash src/run-normalize-tsv.sh
         env:
           GENOME_RELEASE: "${{ matrix.genome_release }}"
@@ -373,7 +373,7 @@ jobs:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
           key: sort-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
 
-      - name: Retrieve conversion output cache
+      - name: Retrieve normalization output cache
         if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
