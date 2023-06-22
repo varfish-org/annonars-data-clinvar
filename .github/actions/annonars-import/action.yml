@@ -7,6 +7,9 @@ inputs:
     description: "Whether to publish artifacts to the named release"
   release-name:
     description: "The name of the release to publish artifacts to"
+  token:
+    description: 'A Github PAT'
+    required: true
 
 runs:
   using: "composite"
@@ -86,6 +89,6 @@ runs:
         tar -czf clinvar-annonars-rocksdb-$genome_release-$version.tar.gz clinvar-annonars-rocksdb-$genome_release-$version
         gh release upload "${{ inputs.release-name }}" clinvar-annonars-rocksdb-$genome_release-$version.tar.gz
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
