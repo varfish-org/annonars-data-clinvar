@@ -44,77 +44,15 @@ jobs:
   Download-Ref:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Install Conda environment
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check for cache reference files
-        id: check-cache-ref-files
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.REF_DIR }}
-          key: download-ref-${{ steps.get-today.outputs.today }}
-          lookup-only: true
-
-      - name: Cache reference files
-        if: steps.check-cache-ref-files.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.REF_DIR }}
-          key: download-ref-${{ steps.get-today.outputs.today }}
-          lookup-only: true
-
-      - name: Download reference files if necessary
-        if: steps.check-cache-ref-files.outputs.cache-hit != 'true'
-        run: bash src/download-refs.sh
+      - name: Download reference
+        uses: ./.github/actions/download-ref
 
   # Download-ClinVar: Download "weekly" ClinVar XML file.
   Download-ClinVar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Check for cache downloaded ClinVar file
-        id: check-cache-clinvar-file
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CLINVAR_DIR }}
-          key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
-          lookup-only: true
-
-      - name: Cache downloaded ClinVar file
-        if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CLINVAR_DIR }}
-          key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
-
-      - name: Download reference files if necessary
-        if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'
-        run: bash src/download-clinvar.sh
-        env:
-          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
-
+      - name: Download ClinVar
+        uses: ./.github/actions/download-clinvar
 
   # Convert-ClinVar: Convert ClinVar XML file to TSV.
   Convert-Clinvar:
