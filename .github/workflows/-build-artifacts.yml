@@ -123,7 +123,7 @@ jobs:
         with:
           publish-artifacts: ${{ inputs.publish-artifacts }}
           release-name: ${{ inputs.release-name }}
-          token: ${{ secrets.GITHUB_TOKEN }}}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Merge-StrucVars: merge structural variants RCV into VCV records.
   Merge-StrucVars:
@@ -141,7 +141,7 @@ jobs:
         with:
           publish-artifacts: ${{ inputs.publish-artifacts }}
           release-name: ${{ inputs.release-name }}
-          token: ${{ secrets.GITHUB_TOKEN }}}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Annonars-Import: Import seqvars into annonars RocksDB
   Annonars-Import:
@@ -159,4 +159,4 @@ jobs:
         with:
           publish-artifacts: ${{ inputs.publish-artifacts }}
           release-name: ${{ inputs.release-name }}
-          token: ${{ secrets.GITHUB_TOKEN }}}
+          token: ${{ secrets.GITHUB_TOKEN }}
