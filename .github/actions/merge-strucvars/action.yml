@@ -1,9 +1,26 @@
 name: merge-strucvars
 description: Merge structural variant files
 
+inputs:
+  publish-artifacts:
+    default: "false"
+    description: "Whether to publish artifacts to the named release"
+  release-name:
+    description: "The name of the release to publish artifacts to"
+  token:
+    description: 'A Github PAT'
+    required: true
+
 runs:
   using: "composite"
   steps:
+    - name: setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
     - name: Get ClinVar version
       id: get-clinvar
       run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
@@ -43,7 +60,11 @@ runs:
           clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
 
     - name: Cache merge strucvars output
-      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      # Enable this if cache was not hit (we need to rebuild) or we publish and
+      # then need the cache in any case.
+      if: |
+        (steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true') ||
+        (inputs.publish-artifacts == 'true')
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
@@ -64,3 +85,29 @@ runs:
         GENOME_RELEASE: "${{ matrix.genome_release }}"
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
+
+    - name: Publish artifacts
+      if: inputs.publish-artifacts == 'true'
+      run: |
+        genome_release=$(echo ${{ matrix.genome_release }} | tr '[:upper:]' '[:lower:]')
+        version=${{ steps.get-clinvar.outputs.clinvar-release }}+${{ env.CLINVAR_TSV_VERSION }}
+
+        mkdir -p /tmp/for-upload/clinvar-strucvar-$genome_release-$version
+        rsync -av \
+          ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged/. \
+          /tmp/for-upload/clinvar-strucvar-$genome_release-$version/.
+        tar --directory=/tmp/for-upload --create --owner=0:0 --gzip \
+          --file /tmp/for-upload/clinvar-strucvar-$genome_release-$version.tar.gz \
+          clinvar-strucvar-$genome_release-$version
+
+        pushd /tmp/for-upload
+        sha256sum clinvar-strucvar-$genome_release-$version.tar.gz \
+        > clinvar-strucvar-$genome_release-$version.tar.gz.sha256
+        popd
+
+        gh release upload --clobber "clinvar-weekly-${{ inputs.release-name }}" \
+          /tmp/for-upload/clinvar-strucvar-$genome_release-$version.tar.gz*
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -x -l {0}

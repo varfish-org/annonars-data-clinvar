@@ -11,3 +11,6 @@ on:
 jobs:
   Build-Artifacts:
     uses: ./.github/workflows/-build-artifacts.yml
+    secrets: inherit
+    with:
+      workflow-name: main.yml

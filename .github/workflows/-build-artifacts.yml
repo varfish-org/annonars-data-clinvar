@@ -3,11 +3,15 @@
 on:
   workflow_call:
     inputs:
+      # Whether to publish artifacts to the named release
+      publish-artifacts:
+        type: string
+      # The name of the release to publish artifacts to
       release-name:
         type: string
-      # Whether to publish artifacts to the named release.
-      publish-artifacts:
-        type: boolean
+      # The name of the workflow to use for cancelling previous runs
+      workflow-name:
+        type: string
 
 # cf. https://github.com/mamba-org/provision-with-micromamba#important
 defaults:
@@ -28,7 +32,7 @@ env:
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.3"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1005
+  MAX_RCVS: 1008
 
 jobs:
   cancel-previous:
@@ -37,7 +41,7 @@ jobs:
     steps:
       - uses: khan/pull-request-workflow-cancel@1.0.0
         with:
-          workflows: "main.yml"
+          workflows: ${{ inputs.workflow-name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -119,6 +123,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/merge-seqvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Merge-StrucVars: merge structural variants RCV into VCV records.
   Merge-StrucVars:
@@ -132,7 +140,11 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/merge-seqvars
+      - uses: ./.github/actions/merge-strucvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Annonars-Import: Import seqvars into annonars RocksDB
   Annonars-Import:
@@ -147,3 +159,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/annonars-import
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}

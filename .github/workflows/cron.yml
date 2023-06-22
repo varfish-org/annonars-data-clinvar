@@ -61,7 +61,7 @@ jobs:
             cp /tmp/clinvar-release.txt clinvar-release.txt
             git add clinvar-release.txt
 
-            git commit -m "chore: update ClinVar release to $release_name"
+            git commit -m "chore: weekly ClinVar release $release_name"
             git push --set-upstream origin $branch_name
           else
             set -e
