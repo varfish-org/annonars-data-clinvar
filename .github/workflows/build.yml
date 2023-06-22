@@ -13,21 +13,44 @@ defaults:
   run:
     shell: bash -l {0}
 
+env:
+  # Path to directory with reference sequences.
+  REF_DIR: /home/runner/work/references
+  # Path to the directory with ClinVar download.
+  CLINVAR_DIR: /home/runner/work/clinvar
+
 jobs:
-  Build:
-    strategy:
-      matrix:
-        annonars_version:
-          - "0.12.4"
-        clinvar_tsv_version:
-          - "0.6.2"
+  # strategy:
+  #   matrix:
+  #     annonars_version:
+  #       - "0.12.4"
+  #     clinvar_tsv_version:
+  #       - "0.6.2"
+
+  # - name: Install Conda environment
+  #   uses: mamba-org/setup-micromamba@v1
+  #   with:
+  #     cache-environment: true
+  #     environment-name: annonars-data-clinvar
+  #     condarc: |
+  #       channels:
+  #         - conda-forge
+  #         - bioconda
+  #         - defaults
+  #     create-args: >-
+  #       python=3.10
+  #       samtools
+  #       htslib
+  #       annonars=${{ matrix.annonars_version }}
+  #       clinvar-tsv=${{ matrix.clinvar_tsv_version }}
+
+  # Download-Ref: Download reference sequences
+  #
+  # We will cache them for the current day.
+  Download-Ref:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Install Conda environment
         uses: mamba-org/setup-micromamba@v1
@@ -40,25 +63,39 @@ jobs:
               - bioconda
               - defaults
           create-args: >-
-            python=3.10
             samtools
             htslib
-            annonars=${{ matrix.annonars_version }}
-            clinvar-tsv=${{ matrix.clinvar_tsv_version }}
+
+      - name: Get current date
+        id: get-today
+        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Cache reference files
         uses: actions/cache@v3
         with:
           path: /home/runner/work/references
-          key: ${{ runner.os }}-references
-
-      - name: Make some free space on the disk
-        run: bash src/free-space.sh
+          key: references-${{ steps.get-today.outputs.today }}
 
       - name: Download reference files if necessary
         run: bash src/download-refs.sh
 
-      - name: Build data via clinvar-tsv
-        shell: bash -el {0}
-        run: |
-          bash src/run.sh
+  # Download-ClinVar: Download "weekly" ClinVar XML file.
+  Download-ClinVar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get clinvar version
+        id: get-clinvar
+        run: echo "cat clinvar-release || echo 00-latest_weekly" >> $GITHUB_OUTPUT
+
+      - name: Cache ClinVar files
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/work/clinvar
+          key: references-${{ steps.get-clinvar.outputs.clinvar-release }}
+
+      - name: Download reference files if necessary
+        run: bash src/download-clinvar.sh
+        env:
+          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
