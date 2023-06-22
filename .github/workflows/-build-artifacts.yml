@@ -3,11 +3,12 @@
 on:
   workflow_call:
     inputs:
+      # Whether to publish artifacts to the named release
+      publish-artifacts:
+        type: string
+      # The name of the release to publish artifacts to
       release-name:
         type: string
-      # Whether to publish artifacts to the named release.
-      publish-artifacts:
-        type: boolean
 
 # cf. https://github.com/mamba-org/provision-with-micromamba#important
 defaults:
@@ -119,6 +120,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/merge-seqvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Merge-StrucVars: merge structural variants RCV into VCV records.
   Merge-StrucVars:
@@ -133,6 +138,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/merge-seqvars
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Annonars-Import: Import seqvars into annonars RocksDB
   Annonars-Import:
@@ -147,3 +156,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/annonars-import
+        with:
+          publish-artifacts: ${{ inputs.publish-artifacts }}
+          release-name: ${{ inputs.release-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}

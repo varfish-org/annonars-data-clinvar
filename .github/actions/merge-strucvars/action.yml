@@ -1,6 +1,16 @@
 name: merge-strucvars
 description: Merge structural variant files
 
+inputs:
+  publish-artifacts:
+    default: "false"
+    description: "Whether to publish artifacts to the named release"
+  release-name:
+    description: "The name of the release to publish artifacts to"
+  token:
+    description: 'A Github PAT'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -43,7 +53,11 @@ runs:
           clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
 
     - name: Cache merge strucvars output
-      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      # Enable this if cache was not hit (we need to rebuild) or we publish and
+      # then need the cache in any case.
+      if: |
+        (steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true') ||
+        (inputs.publish-artifacts == 'true')
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
@@ -62,5 +76,23 @@ runs:
       run: bash .github/actions/merge-strucvars/run.sh
       env:
         GENOME_RELEASE: "${{ matrix.genome_release }}"
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
+    - name: Publish artifacts
+      if: inputs.publish-artifacts == 'true'
+      run: |
+        genome_release=$(echo ${{ matrix.genome_release }} | tr '[:upper:]' '[:lower:]')
+        version=${{ steps.get-clinvar.outputs.clinvar-release }}+${{ env.CLINVAR_TSV_VERSION }}
+        mkdir -p /tmp/for-upload/clinvar-strucvar-$genome_release-$version
+        rsync -av \
+          ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged/. \
+          /tmp/for-upload/clinvar-strucvar-$genome_release-$version/.
+        ls -lhR /tmp/for-upload/clinvar-strucvar-$genome_release-$version
+        cd /tmp/for-upload
+        tar -czf clinvar-strucvar-$genome_release-$version.tar.gz clinvar-strucvar-$genome_release-$version
+        gh release upload "${{ inputs.release-name }}" clinvar-strucvar-$version-$genome_release-$version.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
