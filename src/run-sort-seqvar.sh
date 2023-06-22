@@ -9,6 +9,8 @@ mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/sorted
 
 INPUT=${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/normalized/output.tsv.bgz
 
+zcat $INPUT | head
+
 zcat $INPUT \
     <(zcat $INPUT | head -n 1) \
     <(zcat $INPUT | tail -n +2 | sort -k2,2V -k3,3n -k4,4n -k11,11) \

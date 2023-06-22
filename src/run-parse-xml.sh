@@ -21,6 +21,6 @@ clinvar_tsv parse_xml \
     --output-b37-sv ${OUTPUT_DIR}/GRCh37/strucvar/parsed/output.tsv \
     --output-b38-small ${OUTPUT_DIR}/GRCh38/seqvar/parsed/output.tsv \
     --output-b38-sv ${OUTPUT_DIR}/GRCh37/strucvar/parsed/output.tsv \
-    $(if [[ "$MAX_RCVS" != "" ]]; then \
+    $(if [[ "$MAX_RCVS" != "" ]] && [[ "$MAX_RCVS" != "0" ]]; then \
         echo --max-rcvs $MAX_RCVS;
     fi)
