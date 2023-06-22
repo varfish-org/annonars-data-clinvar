@@ -25,9 +25,9 @@ env:
   # annonars package version
   ANNONARS_VERSION: "0.12.4"
   # clinvar-tsv package version
-  CLINVAR_TSV_VERSION: "0.6.2"
+  CLINVAR_TSV_VERSION: "0.6.3"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1002
+  MAX_RCVS: 1003
 
 jobs:
   cancel-previous:

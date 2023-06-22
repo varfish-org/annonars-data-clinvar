@@ -5,14 +5,6 @@
 set -euo pipefail
 set -x
 
-# TODO: remove once stable
-pushd /tmp
-/home/runner/micromamba-bin/micromamba remove -y clinvar-tsv
-git clone https://github.com/bihealth/clinvar-tsv.git
-cd clinvar-tsv
-pip install .
-popd
-
 mkdir -p ${OUTPUT_DIR}/GRCh3{7,8}/{seqvar,strucvar}/parsed
 
 clinvar_tsv parse_xml \
@@ -20,7 +12,7 @@ clinvar_tsv parse_xml \
     --output-b37-small ${OUTPUT_DIR}/GRCh37/seqvar/parsed/output.tsv \
     --output-b37-sv ${OUTPUT_DIR}/GRCh37/strucvar/parsed/output.tsv \
     --output-b38-small ${OUTPUT_DIR}/GRCh38/seqvar/parsed/output.tsv \
-    --output-b38-sv ${OUTPUT_DIR}/GRCh37/strucvar/parsed/output.tsv \
+    --output-b38-sv ${OUTPUT_DIR}/GRCh38/strucvar/parsed/output.tsv \
     $(if [[ "$MAX_RCVS" != "" ]] && [[ "$MAX_RCVS" != "0" ]]; then \
         echo --max-rcvs $MAX_RCVS;
     fi)

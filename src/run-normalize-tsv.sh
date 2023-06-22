@@ -5,14 +5,6 @@
 set -euo pipefail
 set -x
 
-# TODO: remove once stable
-pushd /tmp
-/home/runner/micromamba-bin/micromamba remove -y clinvar-tsv
-git clone https://github.com/bihealth/clinvar-tsv.git
-cd clinvar-tsv
-pip install .
-popd
-
 mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/normalized
 
 clinvar_tsv normalize_tsv \
