@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# Run the sorting and tabix on the output of "run-normalize-tsv.sh"
+# Run the sorting on the output of "run-normalize-tsv.sh"
 
 set -euo pipefail
 set -x
