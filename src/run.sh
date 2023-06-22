@@ -5,6 +5,14 @@ set -x
 
 export TMPDIR=$(mktemp -d)
 export REF=/home/runner/work/references
+export DEBUG_MEM=1
+
+pushd /tmp
+mamba remove -y clinvar-tsv
+git clone --branch debug-normalize https://github.com/bihealth/clinvar-tsv.git
+cd clinvar-tsv
+pip install .
+popd
 
 clinvar_tsv main \
     --cores 1 \
@@ -12,4 +20,4 @@ clinvar_tsv main \
     --b38-path $REF/GRCh38_no_alt_analysis_set.fa \
     --clinvar-version $(cat $PWD/clinvar-release.txt || echo 2023-0617)
 
-find .
+find . | sort
