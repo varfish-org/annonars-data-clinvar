@@ -42,6 +42,6 @@ runs:
 
     - name: Download reference files if necessary
       if: steps.check-cache-ref-files.outputs.cache-hit != 'true'
-      run: bash src/download-refs.sh
+      run: bash .github/actions/download-ref/run.sh
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}

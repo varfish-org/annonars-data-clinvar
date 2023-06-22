@@ -27,7 +27,7 @@ runs:
 
     - name: Download reference files if necessary
       if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'
-      run: bash src/download-clinvar.sh
+      run: bash .github/actions/download-clinvar/run.sh
       env:
         CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
       # cf. https://github.com/mamba-org/provision-with-micromamba#important

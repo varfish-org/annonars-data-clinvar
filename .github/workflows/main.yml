@@ -45,16 +45,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Download reference
-        uses: ./.github/actions/download-ref
+      - uses: ./.github/actions/download-ref
 
   # Download-ClinVar: Download "weekly" ClinVar XML file.
   Download-ClinVar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Download ClinVar
-        uses: ./.github/actions/download-clinvar
+      - uses: ./.github/actions/download-clinvar
 
   # Convert-ClinVar: Convert ClinVar XML file to TSV.
   Convert-Clinvar:
@@ -62,130 +60,7 @@ jobs:
     needs: Download-ClinVar
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Check cache GRCh37 sequence variant parse_xml output
-        id: check-cache-grch37-seqvar-parse-xml-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
-          lookup-only: true
-
-      - name: Check cache GRCh37 structural variant parse_xml output
-        id: check-cache-grch37-strucvar-parse-xml-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
-          lookup-only: true
-
-      - name: Check cache GRCh38 sequence variant parse_xml output
-        id: check-cache-grch38-seqvar-parse-xml-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
-          lookup-only: true
-
-      - name: Check cache GRCh38 structural variant parse_xml output
-        id: check-cache-grch38-strucvar-parse-xml-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-            python=${{ env.PYTHON_VERSION }}
-            annonars=${{ env.ANNONARS_VERSION }}
-            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
-
-      - name: Cache GRCh37 sequence variant parse_xml output
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
-
-      - name: Cache GRCh37 structural variant parse_xml output
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
-
-      - name: Cache GRCh38 sequence variant parse_xml output
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
-
-      - name: Cache GRCh38 structural variant parse_xml output
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
-
-      - name: Retrieve cached ClinVar file
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CLINVAR_DIR }}
-          key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
-          fail-on-cache-miss: true
-
-      - name: Run the xml-to-tsv conversion
-        if: |
-          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
-          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
-        run: bash src/run-parse-xml.sh
-        env:
-          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
+      - uses: ./.github/actions/convert-clinvar
 
   # Normalize-SeqVars: Normalize small variants.
   Normalize-SeqVars:
@@ -200,69 +75,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check cache normalization output
-        id: check-cache-normalization-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
-          key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-            python=${{ env.PYTHON_VERSION }}
-            annonars=${{ env.ANNONARS_VERSION }}
-            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
-
-      - name: Cache conversion output
-        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
-          key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve sequence variant parse_xml output cache
-        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar
-          fail-on-cache-miss: true
-
-      - name: Retrieve reference cache
-        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.REF_DIR }}
-          key: download-ref-${{ steps.get-today.outputs.today }}
-          fail-on-cache-miss: true
-
-      - name: Run the conversion
-        if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
-        run: bash src/run-normalize-tsv.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
+      - uses: ./.github/actions/normalize-seqvars
 
   # Sort-SeqVars: Sort small variants.
   Sort-SeqVars:
@@ -276,58 +89,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check cache sorting output
-        id: check-cache-sort-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
-          key: sort-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-
-      - name: Cache sorting output
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
-          key: sort-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve normalization output cache
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
-          key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          fail-on-cache-miss: true
-
-      - name: Run the sorting
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        run: bash src/run-sort-seqvar.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
+      - uses: ./.github/actions/sort-seqvars
 
   # Sort-StrucVars: Sort structural variants.
   Sort-StrucVars:
@@ -341,58 +103,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check cache sorting output
-        id: check-cache-sort-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
-          key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-
-      - name: Cache sorting output
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
-          key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve conversion output cache
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/parsed
-          key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-strucvar
-          fail-on-cache-miss: true
-
-      - name: Run the sorting
-        if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
-        run: bash src/run-sort-strucvar.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
+      - uses: ./.github/actions/sort-strucvars
 
   # Merge-SeqVars: merge sequence variants RCV into VCV records.
   Merge-SeqVars:
@@ -406,61 +117,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check cache merge seqvars output
-        id: check-cache-merge-seqvars-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged
-          key: merge-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-            python=${{ env.PYTHON_VERSION }}
-            annonars=${{ env.ANNONARS_VERSION }}
-            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
-
-      - name: Cache merge seqvars output
-        if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged
-          key: merge-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve sorting output
-        if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/sorted
-          key: sort-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          fail-on-cache-miss: true
-
-      - name: Run the merging
-        if: steps.check-cache-merge-seqvars-output.outputs.cache-hit != 'true'
-        run: bash src/run-merge-seqvar.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
+      - uses: ./.github/actions/merge-seqvars
 
   # Merge-StrucVars: merge structural variants RCV into VCV records.
   Merge-StrucVars:
@@ -474,61 +131,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Get current date
-        id: get-today
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Check cache merge strucvars output
-        id: check-cache-merge-strucvars-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
-          key: merge-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-            python=${{ env.PYTHON_VERSION }}
-            annonars=${{ env.ANNONARS_VERSION }}
-            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
-
-      - name: Cache merge strucvars output
-        if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
-          key: merge-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve sorting output
-        if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
-          key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          fail-on-cache-miss: true
-
-      - name: Run the merging
-        if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
-        run: bash src/run-merge-strucvar.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
+      - uses: ./.github/actions/merge-seqvars
 
   # Annonars-Import: Import seqvars into annonars RocksDB
   Annonars-Import:
@@ -542,55 +145,4 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get ClinVar version
-        id: get-clinvar
-        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-
-      - name: Check cache annonars-import output
-        id: check-cache-annonars-import-output
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
-          key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          lookup-only: true
-
-      - name: Install Conda environment
-        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          cache-environment: true
-          environment-name: annonars-data-clinvar
-          condarc: |
-            channels:
-              - conda-forge
-              - bioconda
-              - defaults
-          create-args: >-
-            samtools
-            htslib
-            python=${{ env.PYTHON_VERSION }}
-            annonars=${{ env.ANNONARS_VERSION }}
-            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
-
-      - name: Cache annonars import output
-        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
-          key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-
-      - name: Retrieve merge seqvars output
-        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged
-          key: merge-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
-          fail-on-cache-miss: true
-
-      - name: Run the annonars import
-        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
-        run: bash src/run-annonars-import.sh
-        env:
-          GENOME_RELEASE: "${{ matrix.genome_release }}"
-          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
+      - uses: ./.github/actions/annonars-import

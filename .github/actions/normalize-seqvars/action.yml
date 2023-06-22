@@ -1,0 +1,74 @@
+name: normalize-seqvars
+description: Normalize sequence variants
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get ClinVar version
+      id: get-clinvar
+      run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
+    - name: Get current date
+      id: get-today
+      run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
+    - name: Check cache normalization output
+      id: check-cache-normalization-output
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
+        key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        lookup-only: true
+
+    - name: Install Conda environment
+      if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        cache-environment: true
+        environment-name: annonars-data-clinvar
+        condarc: |
+          channels:
+            - conda-forge
+            - bioconda
+            - defaults
+        create-args: >-
+          samtools
+          htslib
+          python=${{ env.PYTHON_VERSION }}
+          annonars=${{ env.ANNONARS_VERSION }}
+          clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
+
+    - name: Cache conversion output
+      if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
+        key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+
+    - name: Retrieve sequence variant parse_xml output cache
+      if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
+        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar
+        fail-on-cache-miss: true
+
+    - name: Retrieve reference cache
+      if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.REF_DIR }}
+        key: download-ref-${{ steps.get-today.outputs.today }}
+        fail-on-cache-miss: true
+
+    - name: Run the conversion
+      if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
+      run: bash .github/actions/normalize-seqvars/run.sh
+      env:
+        GENOME_RELEASE: "${{ matrix.genome_release }}"
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
