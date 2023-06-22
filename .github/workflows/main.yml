@@ -27,7 +27,7 @@ env:
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.3"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1003
+  MAX_RCVS: 1004
 
 jobs:
   cancel-previous:
@@ -627,12 +627,20 @@ jobs:
             annonars=${{ env.ANNONARS_VERSION }}
             clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
 
-      - name: Cache merge strucvars output
+      - name: Cache annonars import output
         if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
           path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
           key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+
+      - name: Retrieve merge seqvars output
+        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/merged
+          key: merge-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+          fail-on-cache-miss: true
 
       - name: Run the annonars import
         if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
