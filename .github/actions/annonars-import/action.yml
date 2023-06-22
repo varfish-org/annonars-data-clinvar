@@ -47,9 +47,9 @@ runs:
           clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
 
     - name: Cache annonars import output
+      # Enable this if cache was not hit (we need to rebuild) or we publish and
+      # then need the cache in any case.
       if: |
-        # Enable this if cache was not hit (we need to rebuild) or we publish and
-        # then need the cache in any case.
         (steps.check-cache-annonars-import-output.outputs.cache-hit != 'true') ||
         (inputs.publish-artifacts == 'true')
       uses: actions/cache@v3
