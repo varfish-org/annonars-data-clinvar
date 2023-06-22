@@ -87,13 +87,13 @@ jobs:
 
       - name: Get clinvar version
         id: get-clinvar
-        run: echo "clinvar_release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
       - name: Cache ClinVar files
         uses: actions/cache@v3
         with:
           path: /home/runner/work/clinvar
-          key: references-${{ steps.get-clinvar.outputs.clinvar-release }}
+          key: clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
 
       - name: Download reference files if necessary
         run: bash src/download-clinvar.sh
