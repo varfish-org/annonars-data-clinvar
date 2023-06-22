@@ -1,0 +1,66 @@
+name: merge-strucvars
+description: Merge structural variant files
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get ClinVar version
+      id: get-clinvar
+      run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
+    - name: Get current date
+      id: get-today
+      run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
+
+    - name: Check cache merge strucvars output
+      id: check-cache-merge-strucvars-output
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
+        key: merge-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        lookup-only: true
+
+    - name: Install Conda environment
+      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        cache-environment: true
+        environment-name: annonars-data-clinvar
+        condarc: |
+          channels:
+            - conda-forge
+            - bioconda
+            - defaults
+        create-args: >-
+          samtools
+          htslib
+          python=${{ env.PYTHON_VERSION }}
+          annonars=${{ env.ANNONARS_VERSION }}
+          clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
+
+    - name: Cache merge strucvars output
+      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/merged
+        key: merge-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+
+    - name: Retrieve sorting output
+      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
+        key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        fail-on-cache-miss: true
+
+    - name: Run the merging
+      if: steps.check-cache-merge-strucvars-output.outputs.cache-hit != 'true'
+      run: bash .github/actions/merge-strucvars/run.sh
+      env:
+        GENOME_RELEASE: "${{ matrix.genome_release }}"
+      # cf. https://github.com/mamba-org/provision-with-micromamba#important
+      shell: bash -l {0}
