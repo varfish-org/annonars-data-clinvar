@@ -13,6 +13,8 @@ cd clinvar-tsv
 pip install .
 popd
 
+mkdir -p ${OUTPUT_DIR}/GRCh3{7,8}/{seqvar,strucvar}
+
 clinvar_tsv parse_xml \
     --clinvar-xml ${CLINVAR_DIR}/ClinVarFullRelease_${CLINVAR_RELEASE}.xml.gz \
     --output-b37-small ${OUTPUT_DIR}/GRCh37/seqvar/parsed.tsv \
