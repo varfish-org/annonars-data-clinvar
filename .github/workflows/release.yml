@@ -52,6 +52,7 @@ jobs:
     needs:
       - Create-Release
     uses: ./.github/workflows/-build-artifacts.yml
+    secrets: inherit
     with:
       publish-artifacts: ${{ needs.Create-Release.outputs.is-release }}
       release-name: ${{ needs.Create-Release.outputs.release-name }}
