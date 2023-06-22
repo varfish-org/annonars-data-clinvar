@@ -16,7 +16,7 @@ popd
 mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/normalized
 
 clinvar_tsv normalize_tsv \
-    --reference $(if [[ "${GENOME_RELEASE}" == "GRCh37"]]; then \
+    --reference $(if [[ "${GENOME_RELEASE}" == "GRCh37" ]]; then \
         echo $REF_DIR/hs37d5.fa; \
     else \
         echo $REF_DIR/GRCh38_no_alt_analysis_set.fa; \
