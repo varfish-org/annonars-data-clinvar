@@ -584,3 +584,58 @@ jobs:
         run: bash src/run-merge-strucvar.sh
         env:
           GENOME_RELEASE: "${{ matrix.genome_release }}"
+
+  # Annonars-Import: Import seqvars into annonars RocksDB
+  Annonars-Import:
+    runs-on: ubuntu-latest
+    needs:
+      - Merge-SeqVars
+    strategy:
+      matrix:
+        genome_release:
+          - GRCh37
+          - GRCh38
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get ClinVar version
+        id: get-clinvar
+        run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+
+      - name: Check cache annonars-import output
+        id: check-cache-annonars-import-output
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
+          key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+
+      - name: Install Conda environment
+        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          cache-environment: true
+          environment-name: annonars-data-clinvar
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+              - defaults
+          create-args: >-
+            samtools
+            htslib
+            python=${{ env.PYTHON_VERSION }}
+            annonars=${{ env.ANNONARS_VERSION }}
+            clinvar-tsv=${{ env.CLINVAR_TSV_VERSION }}
+
+      - name: Cache merge strucvars output
+        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/annonars-import
+          key: annonars-import-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+
+      - name: Run the annonars import
+        if: steps.check-cache-annonars-import-output.outputs.cache-hit != 'true'
+        run: bash src/run-annonars-import.sh
+        env:
+          GENOME_RELEASE: "${{ matrix.genome_release }}"
