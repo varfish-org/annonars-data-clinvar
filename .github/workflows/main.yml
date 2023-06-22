@@ -27,7 +27,7 @@ env:
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.3"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1004
+  MAX_RCVS: 1005
 
 jobs:
   cancel-previous:
@@ -653,3 +653,4 @@ jobs:
         run: bash src/run-annonars-import.sh
         env:
           GENOME_RELEASE: "${{ matrix.genome_release }}"
+          CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
