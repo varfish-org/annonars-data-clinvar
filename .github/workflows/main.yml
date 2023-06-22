@@ -27,7 +27,7 @@ env:
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.2"
   # Maximal number of RCVs to process.
-  MAX_RCVS: 1001
+  MAX_RCVS: 1002
 
 jobs:
   cancel-previous:
