@@ -46,14 +46,14 @@ jobs:
             annonars=${{ matrix.annonars_version }}
             clinvar-tsv=${{ matrix.clinvar_tsv_version }}
 
-      - name: Cache reference files
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/work/references
-          key: ${{ runner.os }}-references
+      # - name: Cache reference files
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: /home/runner/work/references
+      #     key: ${{ runner.os }}-references
 
-      - name: Make some free space on the disk
-        run: bash src/free-space.sh
+      # - name: Make some free space on the disk
+      #   run: bash src/free-space.sh
 
       - name: Download reference files if necessary
         run: bash src/download-refs.sh
