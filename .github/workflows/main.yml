@@ -144,7 +144,7 @@ jobs:
         id: get-clinvar
         run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
 
-      - name: Cache GRCh37 sequence variant parse_xml output
+      - name: Check cache GRCh37 sequence variant parse_xml output
         id: check-cache-grch37-seqvar-parse-xml-output
         uses: actions/cache@v3
         with:
@@ -152,7 +152,7 @@ jobs:
           key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
           lookup-only: true
 
-      - name: Cache GRCh37 structural variant parse_xml output
+      - name: Check cache GRCh37 structural variant parse_xml output
         id: check-cache-grch37-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
@@ -160,7 +160,7 @@ jobs:
           key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
           lookup-only: true
 
-      - name: Cache GRCh38 sequence variant parse_xml output
+      - name: Check cache GRCh38 sequence variant parse_xml output
         id: check-cache-grch38-seqvar-parse-xml-output
         uses: actions/cache@v3
         with:
@@ -168,7 +168,7 @@ jobs:
           key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
           lookup-only: true
 
-      - name: Cache GRCh38 structural variant parse_xml output
+      - name: Check cache GRCh38 structural variant parse_xml output
         id: check-cache-grch38-strucvar-parse-xml-output
         uses: actions/cache@v3
         with:
@@ -233,6 +233,11 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Run the conversion
+        if: |
+          (steps.check-cache-grch37-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.check-cache-grch37-strucvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.check-cache-grch38-seqvar-parse-xml-output.outputs.cache-hit != 'true') ||
+          (steps.check-cache-grch38-strucvar-parse-xml-output.outputs.cache-hit != 'true')
         run: bash src/run-parse-xml.sh
         env:
           CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
