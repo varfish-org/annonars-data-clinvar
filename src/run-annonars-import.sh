@@ -8,7 +8,7 @@ set -x
 mkdir -p ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/annonars-import
 
 annonars clinvar-minimal import \
-    --genome-release ${GENOME_RELEASE} \
+    --genome-release $(echo ${GENOME_RELEASE} | tr '[:upper:]' '[:lower:]') \
     --path-in-tsv ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/annonars-import/output.tsv \
     --path-out-rocksdb ${OUTPUT_DIR}/${GENOME_RELEASE}/seqvar/annonars-import/rocksdb
 
