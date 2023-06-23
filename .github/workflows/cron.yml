@@ -46,39 +46,57 @@ jobs:
           | cut -d _ -f 2 \
           | cut -d . -f 1 \
           > /tmp/clinvar-release.txt
-          release_name=$(cat /tmp/clinvar-release.txt)
+          clinvar_release=$(cat /tmp/clinvar-release.txt)
+          release_name=$(echo $clinvar_release | tr -d '-')
 
-          # Check whether we already have a branch for this
-          branch_name=clinvar-release-$release_name
           set +e
+
+          # Check whether we already have a tag for this
+          tag_name=clinvar-weekly-$release_name
+          git tag | grep "${tag_name}$" >/dev/null
+          tag_needed=$?
+          # Check whether we already have a branch for this
+          branch_name=release-${tag_name}
           git branch -a | grep "${branch_name}$" >/dev/null
           branch_needed=$?
-          if [ "$branch_needed" -eq 1 ]; then
-            set -e
-            # Create new branch with updated `clinvar-release.txt`
-            git checkout -b $branch_name
 
-            cp /tmp/clinvar-release.txt clinvar-release.txt
-            git add clinvar-release.txt
+          # Only create a new branch if no tag and no branch exist yet.  The
+          # tag will be created together with the release on the main branch.
+          if [[ "$tag_needed" -eq 1 ]]; then
+            # The tag does not exist yet.  We may need to create a new branch
+            # and PR.
+            if [[ "$branch_needed" -eq 1 ]]; then
+              >&2 echo "Neither the tag nor the branch exist; create branch and PR"
+              git checkout -b $branch_name
 
-            git commit -m "chore: weekly ClinVar release $release_name"
-            git push --set-upstream origin $branch_name
+              cp /tmp/clinvar-release.txt clinvar-release.txt
+              git add clinvar-release.txt
+
+              git commit -m "chore: weekly ClinVar release $release_name"
+              git push --set-upstream origin $branch_name
+            else
+              >&2 echo "The tag is missing but the branch exists"
+              git checkout $branch_name
+            fi
+
+            # If necessary, create new pull request and set it to auto-merge.
+            gh pr view >/dev/null
+            pr_needed=$?
+            if [ "$pr_needed" -eq 1 ]; then
+              >&2 echo "The tag is missing, branch exists here, now creating PR"
+
+              # Enforce that the "autorelease" ticket is present.
+              gh label create "autorelease" --color EDEDED --force
+
+              # Creat epull request and set to auto-merge.
+              set -e
+              gh pr create --fill --base main --head $branch_name --label autorelease
+              gh pr merge --auto --squash
+            else
+              set -e
+              >&2 echo "The tag is missing but the PR already exists"
+            fi
           else
             set -e
-            git checkout $branch_name
-          fi
-
-          # Enforce that the "autorelease" ticket is present.
-          gh label create "autorelease" --color EDEDED --force
-
-          # Create new pull request and set it to auto-merge
-          set +e
-          gh pr view >/dev/null
-          pr_needed=$?
-          if [ "$pr_needed" -eq 1 ]; then
-            set -e
-            gh pr create --fill --base main --head $branch_name --label autorelease
-            gh pr merge --auto --squash
-          else
-            set -e
+            >&2 echo "The tag already exist, move on; nothing to do"
           fi
