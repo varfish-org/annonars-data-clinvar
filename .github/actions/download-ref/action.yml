@@ -29,7 +29,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.REF_DIR }}
-        key: download-ref-${{ steps.get-today.outputs.today }}
+        key: download-ref-${{ env.CACHE_SEED }}-${{ steps.get-today.outputs.today }}
         lookup-only: true
 
     - name: Cache reference files
@@ -37,7 +37,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.REF_DIR }}
-        key: download-ref-${{ steps.get-today.outputs.today }}
+        key: download-ref-${{ env.CACHE_SEED }}-${{ steps.get-today.outputs.today }}
         lookup-only: true
 
     - name: Download reference files if necessary

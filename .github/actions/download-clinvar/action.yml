@@ -15,7 +15,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.CLINVAR_DIR }}
-        key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
+        key: download-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}
         lookup-only: true
 
     - name: Cache downloaded ClinVar file
@@ -23,7 +23,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.CLINVAR_DIR }}
-        key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
+        key: download-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}
 
     - name: Download reference files if necessary
       if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'

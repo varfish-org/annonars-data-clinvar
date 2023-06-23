@@ -6,7 +6,10 @@ runs:
   steps:
     - name: Get ClinVar version
       id: get-clinvar
-      run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      run: |
+        echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+        df -h
+        ls -lhR $HOME
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
 
@@ -15,7 +18,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
         lookup-only: true
 
     - name: Check cache GRCh37 structural variant parse_xml output
@@ -23,7 +26,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
         lookup-only: true
 
     - name: Check cache GRCh38 sequence variant parse_xml output
@@ -31,7 +34,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
         lookup-only: true
 
     - name: Check cache GRCh38 structural variant parse_xml output
@@ -39,7 +42,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
         lookup-only: true
 
     - name: Install Conda environment
@@ -73,7 +76,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh37/seqvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-seqvar
 
     - name: Cache GRCh37 structural variant parse_xml output
       if: |
@@ -84,7 +87,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh37/strucvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh37-strucvar
 
     - name: Cache GRCh38 sequence variant parse_xml output
       if: |
@@ -95,7 +98,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh38/seqvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-seqvar
 
     - name: Cache GRCh38 structural variant parse_xml output
       if: |
@@ -106,7 +109,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/GRCh38/strucvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-GRCh38-strucvar
 
     - name: Retrieve cached ClinVar file
       if: |
@@ -117,7 +120,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.CLINVAR_DIR }}
-        key: download-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}
+        key: download-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}
         fail-on-cache-miss: true
 
     - name: Run the xml-to-tsv conversion

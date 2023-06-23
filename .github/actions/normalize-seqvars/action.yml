@@ -21,7 +21,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
-        key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        key: normalize-seqvars-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
         lookup-only: true
 
     - name: Install Conda environment
@@ -47,14 +47,14 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/normalized
-        key: normalize-seqvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        key: normalize-seqvars-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
 
     - name: Retrieve sequence variant parse_xml output cache
       if: steps.check-cache-normalization-output.outputs.cache-hit != 'true'
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/seqvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-seqvar
         fail-on-cache-miss: true
 
     - name: Retrieve reference cache
@@ -62,7 +62,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.REF_DIR }}
-        key: download-ref-${{ steps.get-today.outputs.today }}
+        key: download-ref-${{ env.CACHE_SEED }}-${{ steps.get-today.outputs.today }}
         fail-on-cache-miss: true
 
     - name: Run the conversion

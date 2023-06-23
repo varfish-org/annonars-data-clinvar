@@ -21,7 +21,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
-        key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        key: sort-strucvars-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
         lookup-only: true
 
     - name: Install Conda environment
@@ -44,14 +44,14 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/sorted
-        key: sort-strucvars-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
+        key: sort-strucvars-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
 
     - name: Retrieve conversion output cache
       if: steps.check-cache-sort-output.outputs.cache-hit != 'true'
       uses: actions/cache@v3
       with:
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.genome_release }}/strucvar/parsed
-        key: convert-clinvar-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-strucvar
+        key: convert-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.CLINVAR_TSV_VERSION }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}-strucvar
         fail-on-cache-miss: true
 
     - name: Run the sorting
