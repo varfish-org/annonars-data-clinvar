@@ -65,6 +65,7 @@ jobs:
     needs: Download-ClinVar
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/free-disk-space
       - uses: ./.github/actions/convert-clinvar
 
   # Normalize-SeqVars: Normalize small variants.
@@ -80,6 +81,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/free-disk-space
       - uses: ./.github/actions/normalize-seqvars
 
   # Sort-SeqVars: Sort small variants.
@@ -94,6 +96,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/free-disk-space
       - uses: ./.github/actions/sort-seqvars
 
   # Sort-StrucVars: Sort structural variants.
@@ -122,6 +125,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/free-disk-space
       - uses: ./.github/actions/merge-seqvars
         with:
           publish-artifacts: ${{ inputs.publish-artifacts }}
@@ -158,6 +162,7 @@ jobs:
           - GRCh38
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/free-disk-space
       - uses: ./.github/actions/annonars-import
         with:
           publish-artifacts: ${{ inputs.publish-artifacts }}
