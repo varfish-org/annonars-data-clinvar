@@ -12,7 +12,11 @@ on:
     #         │ │ │ │ │
     #         │ │ │ │ │
     #         * * * * *
-    - cron: '37 * * * *'
+    #
+    # Human-readable: "At minute 37 past every 3rd hour on Monday."
+    #
+    # This is sufficient as there are only releases on Mondays.
+    - cron: '37 */3 * * 1'
 
 jobs:
   Check-ClinVar-FTP:
