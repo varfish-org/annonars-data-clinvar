@@ -23,7 +23,9 @@ runs:
 
     - name: Get ClinVar version
       id: get-clinvar
-      run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      run: |
+        echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+        echo "release-name=$((cat clinvar-release.txt || echo "00-latest_weekly) | tr -d '-')" >> $GITHUB_OUTPUT
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
 
@@ -90,7 +92,7 @@ runs:
       if: inputs.publish-artifacts == 'true'
       run: |
         genome_release=$(echo ${{ matrix.genome_release }} | tr '[:upper:]' '[:lower:]')
-        version=${{ steps.get-clinvar.outputs.clinvar-release }}+${{ env.CLINVAR_TSV_VERSION }}
+        version=${{ steps.get-clinvar.outputs.release-name }}+${{ env.CLINVAR_TSV_VERSION }}
 
         mkdir -p /tmp/for-upload/clinvar-seqvar-$genome_release-$version
         rsync -av \
