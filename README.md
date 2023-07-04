@@ -1,4 +1,4 @@
-[![CI](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/build.yml/badge.svg)](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/build.yml)
+[![CI](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/main.yml/badge.svg)](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/main.yml)
 
 # `annonars` ClinVar Data Builds
 
