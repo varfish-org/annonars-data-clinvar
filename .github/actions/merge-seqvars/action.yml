@@ -25,7 +25,7 @@ runs:
       id: get-clinvar
       run: |
         echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
-        echo "release-name=$((cat clinvar-release.txt || echo "00-latest_weekly) | tr -d '-')" >> $GITHUB_OUTPUT
+        echo "release-name=$(cat clinvar-release.txt || echo "00-latest_weekly) | tr -d '-')" >> $GITHUB_OUTPUT
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
 
