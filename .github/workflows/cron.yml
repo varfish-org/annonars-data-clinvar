@@ -27,7 +27,6 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: setup git config
         run: |
@@ -36,7 +35,7 @@ jobs:
 
       - name: Create new PR if necessary
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_PAT }}
         run: |
           set -x
 
