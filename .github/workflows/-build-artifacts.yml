@@ -28,7 +28,7 @@ env:
   # Python version
   PYTHON_VERSION: "3.10"
   # annonars package version
-  ANNONARS_VERSION: "0.12.4"
+  ANNONARS_VERSION: "0.12.9"
   # clinvar-tsv package version
   CLINVAR_TSV_VERSION: "0.6.3"
   # Helper to get unique cache keys
