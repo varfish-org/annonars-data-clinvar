@@ -6,7 +6,7 @@ runs:
   steps:
     - name: Get ClinVar version
       id: get-clinvar
-      run: echo "clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly)" >> $GITHUB_OUTPUT
+      run: echo "clinvar-release=$(cat clinvar-release.txt)" >> $GITHUB_OUTPUT
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
 
@@ -14,7 +14,7 @@ runs:
       id: check-cache-clinvar-file
       uses: actions/cache@v3
       with:
-        path: ${{ env.CLINVAR_DIR }}
+        path: ${{ env.CLINVAR_JSONL_DIR }}
         key: download-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}
         lookup-only: true
 
@@ -22,13 +22,14 @@ runs:
       if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'
       uses: actions/cache@v3
       with:
-        path: ${{ env.CLINVAR_DIR }}
+        path: ${{ env.CLINVAR_JSONL_DIR }}
         key: download-clinvar-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}
 
     - name: Download reference files if necessary
       if: steps.check-cache-clinvar-file.outputs.cache-hit != 'true'
       run: bash .github/actions/download-clinvar/run.sh
       env:
+        GH_TOKEN: ${{ github.token }}
         CLINVAR_RELEASE: "${{ steps.get-clinvar.outputs.clinvar-release }}"
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
