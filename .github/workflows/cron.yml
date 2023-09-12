@@ -19,7 +19,7 @@ on:
     - cron: '37 */3 * * 1'
 
 jobs:
-  Check-ClinVar-FTP:
+  Check-Data-JSONL:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -39,24 +39,12 @@ jobs:
         run: |
           set -x
 
-          # Download ClinVar XML listing
-          curl https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/weekly_release/ \
-          > /tmp/lst.html
-
-          # Look for latest release name
-          grep '.xml.gz"' /tmp/lst.html \
-          | tail -n 1 \
-          | cut -d '"' -f 2 \
-          | cut -d _ -f 2 \
-          | cut -d . -f 1 \
-          > /tmp/clinvar-release.txt
-          clinvar_release=$(cat /tmp/clinvar-release.txt)
-          release_name=$(echo $clinvar_release | tr -d '-')
+          release_name=$(gh release view -R bihealth/clinvar-data-jsonl --json name --jq .name | cut -d - -f 2)
 
           set +e
 
           # Check whether we already have a tag for this
-          tag_name=clinvar-weekly-$release_name
+          tag_name=cada-prio-data-$release_name
           git tag | grep "${tag_name}$" >/dev/null
           tag_needed=$?
           # Check whether we already have a branch for this
@@ -73,10 +61,10 @@ jobs:
               >&2 echo "Neither the tag nor the branch exist; create branch and PR"
               git checkout -b $branch_name
 
-              cp /tmp/clinvar-release.txt clinvar-release.txt
-              git add clinvar-release.txt
+              cp /tmp/release-name.txt release-name.txt
+              git add release-name.txt
 
-              git commit -m "chore: weekly ClinVar release $release_name"
+              git commit -m "chore: weekly cada-prio data release 20230903"
               git push --set-upstream origin $branch_name
             else
               >&2 echo "The tag is missing but the branch exists"

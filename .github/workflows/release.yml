@@ -36,9 +36,9 @@ jobs:
             echo "This is a release commit."
             echo is-release=true >> $GITHUB_OUTPUT
             # The full name of the weekly release, includes the dash after the year.
-            echo clinvar-release=$(cat clinvar-release.txt || echo 00-latest_weekly) >> $GITHUB_OUTPUT
+            echo clinvar-release=$(cat clinvar-release.txt) >> $GITHUB_OUTPUT
             # The release name without the dash after the year.
-            echo release-name=$((cat clinvar-release.txt || echo 00-latest_weekly) | tr -d '-') >> $GITHUB_OUTPUT
+            echo release-name=$((cat clinvar-release.txt) | tr -d '-') >> $GITHUB_OUTPUT
           else
             echo "This is not a release commit."
             echo is-release=false >> $GITHUB_OUTPUT
