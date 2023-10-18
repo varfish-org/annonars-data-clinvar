@@ -26,7 +26,7 @@ env:
   # Python version
   PYTHON_VERSION: "3.10"
   # annonars package version
-  ANNONARS_VERSION: "0.18.0"
+  ANNONARS_VERSION: "0.24.1"
   # Helper to get unique cache keys
   CACHE_SEED: 0
   # Maximal number of RCVs to process (0 = no limit).
