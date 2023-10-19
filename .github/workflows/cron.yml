@@ -1,4 +1,4 @@
-name: Check ClinVar FTP
+name: Check clinvar-data-jsonl Releases
 
 on:
   workflow_dispatch:
@@ -39,12 +39,18 @@ jobs:
         run: |
           set -x
 
-          release_name=$(gh release view -R bihealth/clinvar-data-jsonl --json name --jq .name | cut -d - -f 2)
+          gh release view \
+            -R bihealth/clinvar-data-jsonl \
+            --json name \
+            --jq .name \
+          | cut -d - -f 2 \
+          > /tmp/release-name.txt
+          release_name=$(cat /tmp/release-name.txt)
 
           set +e
 
           # Check whether we already have a tag for this
-          tag_name=cada-prio-data-$release_name
+          tag_name=annonars-data-clinvar-$release_name
           git tag | grep "${tag_name}$" >/dev/null
           tag_needed=$?
           # Check whether we already have a branch for this
@@ -64,7 +70,7 @@ jobs:
               cp /tmp/release-name.txt release-name.txt
               git add release-name.txt
 
-              git commit -m "chore: weekly cada-prio data release 20230903"
+              git commit -m "chore: weekly annonars-data-clinvar data release 20230903"
               git push --set-upstream origin $branch_name
             else
               >&2 echo "The tag is missing but the branch exists"
