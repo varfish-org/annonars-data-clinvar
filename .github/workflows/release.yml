@@ -32,7 +32,7 @@ jobs:
           set -x
 
           msg=$(git log -1 --pretty=%B | head -n 1)
-          if [[ "$msg" == "chore: weekly ClinVar release "* ]]; then
+          if [[ "$msg" == "chore: weekly annonars-data-clinvar release "* ]]; then
             echo "This is a release commit."
             echo is-release=true >> $GITHUB_OUTPUT
             # The full name of the weekly release, includes the dash after the year.
@@ -47,14 +47,14 @@ jobs:
       - name: Create release
         if: steps.check-release.outputs.is-release == 'true'
         run: |
-          tag=clinvar-weekly-$RELEASE_NAME
+          tag=annonars-data-clinvar-$RELEASE_NAME
           if ! git tag | grep $tag >/dev/null; then
-            git tag -a $tag -m "Auto-release of weekly ClinVar $RELEASE_NAME"
+            git tag -a $tag -m "Auto-release of weekly annonars-data-clinvar $RELEASE_NAME"
             git push --tags
           fi
           if ! gh release list | grep $tag >/dev/null; then
-            gh release create clinvar-weekly-$RELEASE_NAME \
-              --title=clinvar-weekly-$RELEASE_NAME \
+            gh release create annonars-data-clinvar-$RELEASE_NAME \
+              --title=annonars-data-clinvar-$RELEASE_NAME \
               --verify-tag \
               --draft=true \
               --notes "This release was created automatically by GitHub Action in our CI."
@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           set -x
 
-          gh release edit clinvar-weekly-$RELEASE_NAME \
+          gh release edit annonars-data-clinvar-$RELEASE_NAME \
             --draft=false \
             --discussion-category=Announcements
         env:

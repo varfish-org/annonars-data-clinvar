@@ -106,7 +106,7 @@ runs:
         > annonars-clinvar-genes-$version.tar.gz.sha256
         popd
 
-        gh release upload --clobber "clinvar-weekly-${{ inputs.release-name }}" \
+        gh release upload --clobber "annonars-data-clinvar-${{ inputs.release-name }}" \
           /tmp/for-upload/annonars-clinvar-genes-$version.tar.gz*
       env:
         GITHUB_TOKEN: ${{ inputs.token }}

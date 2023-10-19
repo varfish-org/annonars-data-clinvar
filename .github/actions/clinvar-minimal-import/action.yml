@@ -100,14 +100,14 @@ runs:
         ls -lhR /tmp/for-upload/annonars-clinvar-minimal-$genome_release-$version
         tar --directory=/tmp/for-upload --create --owner=0:0 --gzip \
           --file /tmp/for-upload/annonars-clinvar-minimal-$genome_release-$version.tar.gz \
-        /tmp/for-upload/annonars-clinvar-minimal-$genome_release-$version
+        annonars-clinvar-minimal-$genome_release-$version
 
         pushd /tmp/for-upload
         sha256sum annonars-clinvar-minimal-$genome_release-$version.tar.gz \
         > annonars-clinvar-minimal-$genome_release-$version.tar.gz.sha256
         popd
 
-        gh release upload --clobber "clinvar-weekly-${{ inputs.release-name }}" \
+        gh release upload --clobber "annonars-data-clinvar-${{ inputs.release-name }}" \
           /tmp/for-upload/annonars-clinvar-minimal-$genome_release-$version.tar.gz*
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
