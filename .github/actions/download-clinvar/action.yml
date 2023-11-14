@@ -6,7 +6,7 @@ runs:
   steps:
     - name: Get ClinVar version
       id: get-clinvar
-      run: echo "clinvar-release=$(cat clinvar-release.txt)" >> $GITHUB_OUTPUT
+      run: echo "clinvar-release=$(cat release-name.txt)" >> $GITHUB_OUTPUT
       # cf. https://github.com/mamba-org/provision-with-micromamba#important
       shell: bash -l {0}
 
