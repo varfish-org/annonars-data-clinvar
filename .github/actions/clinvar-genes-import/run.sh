@@ -15,7 +15,7 @@ for x in \
     zcat $x \
     | tr "'" '"' \
     | sed -e 's/None/null/g' \
-    | egrep '"benign"|"likely benign"|"uncertain significance"|"pathogenic"|"pathogenic"' \
+    | egrep '"benign"|"likely benign"|"uncertain significance"|"likely pathogenic"|"pathogenic"' \
     | egrep -v '"start": null|"stop": null' \
     > $TMPDIR/$(basename $x .gz)
 
