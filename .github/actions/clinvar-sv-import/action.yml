@@ -35,23 +35,6 @@ runs:
         key: annonars-clinvar-sv-import-${{ env.CACHE_SEED }}-${{ steps.get-clinvar.outputs.clinvar-release }}-${{ env.MAX_RCVS }}-${{ matrix.genome_release }}
         lookup-only: true
 
-    - name: Install Conda environment
-      if: steps.check-cache-annonars-clinvar-sv-import-output.outputs.cache-hit != 'true'
-      uses: mamba-org/setup-micromamba@v1
-      with:
-        cache-environment: true
-        environment-name: annonars-data-clinvar
-        condarc: |
-          channels:
-            - conda-forge
-            - bioconda
-            - defaults
-        create-args: >-
-          samtools
-          htslib
-          python=${{ env.PYTHON_VERSION }}
-          annonars=${{ env.ANNONARS_VERSION }}
-
     - name: Cache annonars import output
       # Enable this if cache was not hit (we need to rebuild) or we publish and
       # then need the cache in any case.

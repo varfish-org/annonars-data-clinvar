@@ -23,10 +23,8 @@ env:
   CLINVAR_JSONL_DIR: /home/runner/work/clinvar
   # Parse to the directory with clinvar-tsv output files.
   OUTPUT_DIR: /home/runner/work/output
-  # Python version
-  PYTHON_VERSION: "3.10"
   # annonars package version
-  ANNONARS_VERSION: "0.31.0"
+  ANNONARS_VERSION: "feat-finalize-integration-extracted-vcv-vars"
   # Helper to get unique cache keys
   CACHE_SEED: 1
   # Maximal number of RCVs to process (0 = no limit).
