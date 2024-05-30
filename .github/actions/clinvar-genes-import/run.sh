@@ -7,37 +7,17 @@ set -x
 
 mkdir -p $OUTPUT_DIR/clinvar-genes
 
-# The transmogrification (tr/sed) can go away after the latest clinvar-this version is used...
-export TMPDIR=$(mktemp -d)
-trap "rm -rf $TMPDIR" EXIT ERR
-for x in \
-  $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-grch3?-seqvars.jsonl.gz; do
-    zcat $x \
-    | tr "'" '"' \
-    | sed -e 's/None/null/g' \
-    | egrep '"benign"|"likely benign"|"uncertain significance"|"likely pathogenic"|"pathogenic"' \
-    | egrep -v '"start": null|"stop": null' \
-    > $TMPDIR/$(basename $x .gz)
-
-    gzip -c $TMPDIR/$(basename $x .gz) > $x
-done
-for x in \
-  $CLINVAR_JSONL_DIR/clinvar-data-gene-variant-report-*/gene-variant-report.jsonl.gz \
-  $CLINVAR_JSONL_DIR/clinvar-data-acmg-class-by-freq-*/clinvar-acmg-class-by-freq.jsonl.gz; do
-    zcat $x \
-    | tr "'" '"' \
-    | sed -e 's/None/null/g' \
-    > $TMPDIR/$(basename $x .gz)
-
-    gzip -c $TMPDIR/$(basename $x .gz) > $x
-done
-
-annonars clinvar-genes import \
-    --path-per-impact-jsonl $CLINVAR_JSONL_DIR/clinvar-data-gene-variant-report-*/gene-variant-report.jsonl.gz \
-    --path-per-frequency-jsonl $CLINVAR_JSONL_DIR/clinvar-data-acmg-class-by-freq-*/clinvar-acmg-class-by-freq.jsonl.gz \
-    --paths-variant-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-grch37-seqvars.jsonl.gz \
-    --paths-variant-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-grch38-seqvars.jsonl.gz \
-    --path-out-rocksdb $OUTPUT_DIR/clinvar-genes/rocksdb
+sudo docker run \
+    --volume "$CLINVAR_JSONL_DIR:$CLINVAR_JSONL_DIR:ro" \
+    --volume "$OUTPUT_DIR:$OUTPUT_DIR:rw" \
+    ghcr.io/varfish-org/annonars:${ANNONARS_VERSION} \
+    exec /usr/local/bin/annonars \
+        clinvar-genes import \
+        --path-per-impact-jsonl $CLINVAR_JSONL_DIR/clinvar-data-gene-variant-report-*/gene-variant-report.jsonl.gz \
+        --path-per-frequency-jsonl $CLINVAR_JSONL_DIR/clinvar-data-acmg-class-by-freq-*/clinvar-acmg-class-by-freq.jsonl.gz \
+        --paths-variant-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-grch37-seqvars.jsonl.gz \
+        --paths-variant-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-grch38-seqvars.jsonl.gz \
+        --path-out-rocksdb $OUTPUT_DIR/clinvar-genes/rocksdb
 
 cat >$OUTPUT_DIR/clinvar-genes/spec.yaml <<EOF
 dc.identifier: annonars/clinvar-genes-$CLINVAR_RELEASE+$ANNONARS_VERSION

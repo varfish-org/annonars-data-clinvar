@@ -9,25 +9,15 @@ genome_release=$(echo $GENOME_RELEASE | tr '[:upper:]' '[:lower:]')
 
 mkdir -p $OUTPUT_DIR/$genome_release/clinvar-minimal
 
-# The transmogrification (tr/sed) can go away after the latest clinvar-this version is used...
-export TMPDIR=$(mktemp -d)
-trap "rm -rf $TMPDIR" EXIT ERR
-for x in \
-  $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-$genome_release-seqvars.jsonl.gz; do
-    zcat $x \
-    | tr "'" '"' \
-    | sed -e 's/None/null/g' \
-    | egrep '"benign"|"likely benign"|"uncertain significance"|"likely pathogenic"|"pathogenic"' \
-    | egrep -v '"start": null|"stop": null' \
-    > $TMPDIR/$(basename $x .gz)
-
-    gzip -c $TMPDIR/$(basename $x .gz) > $x
-done
-
-annonars clinvar-minimal import \
-    --genome-release $genome_release \
-    --path-in-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-$genome_release-seqvars.jsonl.gz \
-    --path-out-rocksdb $OUTPUT_DIR/$genome_release/clinvar-minimal/rocksdb
+sudo docker run \
+    --volume "$CLINVAR_JSONL_DIR:$CLINVAR_JSONL_DIR:ro" \
+    --volume "$OUTPUT_DIR:$OUTPUT_DIR:rw" \
+    ghcr.io/varfish-org/annonars:${ANNONARS_VERSION} \
+    exec /usr/local/bin/annonars \
+        clinvar-minimal import \
+        --genome-release $genome_release \
+        --path-in-jsonl $CLINVAR_JSONL_DIR/clinvar-data-extract-vars-*/clinvar-variants-$genome_release-seqvars.jsonl.gz \
+        --path-out-rocksdb $OUTPUT_DIR/$genome_release/clinvar-minimal/rocksdb
 
 cat >$OUTPUT_DIR/$genome_release/clinvar-minimal/spec.yaml <<EOF
 dc.identifier: annonars/clinvar-$CLINVAR_RELEASE+$ANNONARS_VERSION
