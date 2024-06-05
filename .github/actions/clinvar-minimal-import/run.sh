@@ -44,3 +44,9 @@ EOF
 
 ls -lhR $OUTPUT_DIR
 cat $OUTPUT_DIR/$genome_release/clinvar-minimal/spec.yaml
+
+cd $OUTPUT_DIR/$genome_release/clinvar-minimal
+hashdeep -l -r . >/tmp/MANIFEST.txt
+CHECKSUM=$(sha256sum /tmp/MANIFEST.txt | cut -d ' ' -f 1)
+echo "## EOF SHA256=$CHECKSUM" >> /tmp/MANIFEST.txt
+cp /tmp/MANIFEST.txt .
