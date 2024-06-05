@@ -42,3 +42,9 @@ x-created-from:
 EOF
 
 ls -lhR $OUTPUT_DIR
+
+cd $OUTPUT_DIR
+hashdeep -l -r . >/tmp/MANIFEST.txt
+CHECKSUM=$(sha256sum /tmp/MANIFEST.txt | cut -d ' ' -f 1)
+echo "## EOF SHA256=$CHECKSUM" >> /tmp/MANIFEST.txt
+cp /tmp/MANIFEST.txt .

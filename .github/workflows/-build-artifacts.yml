@@ -59,6 +59,7 @@ jobs:
           - GRCh37
           - GRCh38
     steps:
+      - run: sudo apt install -y hashdeep
       - uses: actions/checkout@v4
       - uses: ./.github/actions/clinvar-minimal-import
         with:
@@ -78,6 +79,7 @@ jobs:
           - GRCh37
           - GRCh38
     steps:
+      - run: sudo apt install -y hashdeep
       - uses: actions/checkout@v4
       - uses: ./.github/actions/clinvar-sv-import
         with:
@@ -91,6 +93,7 @@ jobs:
     needs:
       - Download-ClinVar
     steps:
+      - run: sudo apt install -y hashdeep
       - uses: actions/checkout@v4
       - uses: ./.github/actions/clinvar-genes-import
         with:
