@@ -24,9 +24,9 @@ env:
   # Parse to the directory with clinvar-tsv output files.
   OUTPUT_DIR: /home/runner/work/output
   # annonars package version
-  ANNONARS_VERSION: "0.41.0"
+  ANNONARS_VERSION: "0.42.4"
   # Helper to get unique cache keys
-  CACHE_SEED: 1
+  CACHE_SEED: 0
   # Maximal number of RCVs to process (0 = no limit).
   MAX_RCVS: 0
 
