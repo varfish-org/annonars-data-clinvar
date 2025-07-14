@@ -40,7 +40,7 @@ jobs:
           set -x
 
           gh release view \
-            -R bihealth/clinvar-data-jsonl \
+            -R varfish-org/clinvar-data-jsonl \
             --json name \
             --jq .name \
           | cut -d - -f 3 \
