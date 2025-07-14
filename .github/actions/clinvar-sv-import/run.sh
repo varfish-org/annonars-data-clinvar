@@ -36,8 +36,8 @@ dc.description: |
   v${ANNONARS_VERSION}.
 dc.source:
   - PMID:29165669
-  - https://github.com/bihealth/clinvar-data-jsonl
-  - https://github.com/bihealth/annonars-data-clinvar
+  - https://github.com/varfish-org/clinvar-data-jsonl
+  - https://github.com/varfish-org/annonars-data-clinvar
 x-created-from:
   - name: ClinVar weekly release
     version: $CLINVAR_RELEASE

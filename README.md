@@ -1,4 +1,4 @@
-[![CI](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/main.yml/badge.svg)](https://github.com/bihealth/annonars-data-clinvar/actions/workflows/main.yml)
+[![CI](https://github.com/varfish-org/annonars-data-clinvar/actions/workflows/main.yml/badge.svg)](https://github.com/varfish-org/annonars-data-clinvar/actions/workflows/main.yml)
 
 # `annonars` ClinVar Data Builds
 
@@ -23,7 +23,7 @@ The following is for developers of `annonars-data-clinvar` itself.
 ## Managing Project with Terraform
 
 ```
-# export GITHUB_OWNER=bihealth
+# export GITHUB_OWNER=varfish-org
 # export GITHUB_TOKEN=ghp_TOKEN
 
 # cd utils/terraform
